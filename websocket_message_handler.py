@@ -1,15 +1,24 @@
 from websockets import WebSocketServerProtocol
 
-from websocket_message import WebSocketMessage, WebSocketMessageType
+from websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
 
 
 class WebsocketMessageHandler:
     def __init__(self, websocket: WebSocketServerProtocol):
         self.websocket = websocket
+        self.__dispatcher = {
+            WebSocketMessageAction.ECHO: self.__echo_action,
+            WebSocketMessageAction.TEST: self.__test_action,
+        }
 
     async def handle_message(self, message: WebSocketMessage):
-        print("handling")
-        print(message)
+        print(f"handling: {message}")
+        await self.__dispatcher[message.action](message)
+
+    async def __echo_action(self, message: WebSocketMessage):
         message.type = WebSocketMessageType.RESPONSE
-        response = message.to_json()
-        await self.websocket.send(response)
+        print(f"echoing: {message}")
+        await self.websocket.send(message.to_json())
+
+    async def __test_action(self, message: WebSocketMessage):
+        pass
