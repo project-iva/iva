@@ -1,3 +1,4 @@
+import uuid as uuid
 from websockets import WebSocketServerProtocol
 
 from websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
@@ -21,4 +22,8 @@ class WebsocketMessageHandler:
         await self.websocket.send(message.to_json())
 
     async def __test_action(self, message: WebSocketMessage):
-        pass
+        test_data = {
+            'key': 'value'
+        }
+        message = WebSocketMessage(str(uuid.uuid4()), WebSocketMessageType.REQUEST, WebSocketMessageAction.TEST, test_data)
+        await self.websocket.send(message.to_json())

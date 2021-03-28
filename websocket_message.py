@@ -15,14 +15,19 @@ class WebSocketMessageAction(str, Enum):
 
 @dataclass
 class WebSocketMessage:
-    id: int
+    id: str
     type: WebSocketMessageType
     action: WebSocketMessageAction
     data: dict
 
     @classmethod
     def from_dict(cls, d):
-        return cls(d['id'], WebSocketMessageType(d['type']), WebSocketMessageAction(d['action']), d['data'])
+        return cls(
+            d.get('id'),
+            WebSocketMessageType(d.get('type')),
+            WebSocketMessageAction(d.get('action')),
+            d.get('data', {})
+        )
 
     @classmethod
     def from_json(cls, j):
