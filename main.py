@@ -1,9 +1,12 @@
+import asyncio
+import time
+
 from iva_communicator import IvaCommunicator
 
 
-def main():
+async def main():
     iva_communicator = IvaCommunicator('localhost', 5678)
     iva_communicator.start()
 
 
-main()
+asyncio.run(main())
