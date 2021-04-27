@@ -16,6 +16,10 @@ class WebsocketMessageHandler:
         print(f"handling: {message}")
         await self.__dispatcher[message.action](message)
 
+    async def send_message(self, message: WebSocketMessage):
+        print(f"sending: {message}")
+        await self.websocket.send(message.to_json())
+
     async def __echo_action(self, message: WebSocketMessage):
         message.type = WebSocketMessageType.RESPONSE
         print(f"echoing: {message}")

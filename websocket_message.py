@@ -11,6 +11,8 @@ class WebSocketMessageType(str, Enum):
 class WebSocketMessageAction(str, Enum):
     TEST = 'test'
     ECHO = 'echo'
+    MORNING_ROUTINE_UPDATE = 'morning_routine_update'
+    MORNING_ROUTINE_FINISHED = 'morning_routine_finished'
 
 
 @dataclass

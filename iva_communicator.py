@@ -1,10 +1,11 @@
 import asyncio
 from threading import Thread
-
+import uuid as uuid
 import websockets
+from typing import List
 from websockets import WebSocketServerProtocol
 
-from websocket_message import WebSocketMessage
+from websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
 from websocket_message_handler import WebsocketMessageHandler
 
 
@@ -13,7 +14,7 @@ class IvaCommunicator(Thread):
         super().__init__()
         self.__uri = uri
         self.__port = port
-        self.__connected_sockets = []
+        self.__connected_sockets: List[WebsocketMessageHandler] = []
 
     def run(self):
         server_loop = asyncio.new_event_loop()
@@ -22,8 +23,12 @@ class IvaCommunicator(Thread):
         server_loop.run_forever()
 
     async def __handler(self, websocket: WebSocketServerProtocol, path: str):
-        self.__connected_sockets.append(websocket)
         websocket_message_handler = WebsocketMessageHandler(websocket)
+        self.__connected_sockets.append(websocket_message_handler)
         async for message in websocket:
             websocket_message = WebSocketMessage.from_json(message)
             await websocket_message_handler.handle_message(websocket_message)
+
+    async def send_message(self, message: WebSocketMessage):
+        coroutines = [handler.send_message(message) for handler in self.__connected_sockets]
+        await asyncio.gather(*coroutines)
