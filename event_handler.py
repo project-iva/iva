@@ -5,12 +5,13 @@ from threading import Thread
 
 import uuid
 
+from event import Event
 from iva_communicator import IvaCommunicator
 from websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
 
 
 class EventHandler(Thread):
-    def __init__(self, event: str, iva: Iva, communicator: IvaCommunicator):
+    def __init__(self, event: Event, iva: Iva, communicator: IvaCommunicator):
         super().__init__()
         self.event = event
         self.iva = iva
@@ -19,7 +20,7 @@ class EventHandler(Thread):
     def run(self):
         print(self.event)
         event_loop = asyncio.new_event_loop()
-        if self.event == 'MORNING':
+        if self.event.name == 'MORNING':
             print("handling morning")
             event_loop.run_until_complete(self.__handle_morning_routine_event())
             # self.communicator.start_morning_routine()

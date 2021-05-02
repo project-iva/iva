@@ -22,9 +22,9 @@ class Iva(Thread):
     def run(self):
         while True:
             event = self.event_queue.get()
-            print(f'iva: {event}')
+            print(f'iva: {event.name}')
             print(self.listeners.keys())
-            if listener := self.listeners.pop(event, None):
+            if listener := self.listeners.pop(event.name, None):
                 print('passing event to a listener')
                 listener.put(event)
             else:
