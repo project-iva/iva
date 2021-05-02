@@ -1,3 +1,4 @@
+import time
 from queue import Queue
 from threading import Thread, RLock
 from datetime import datetime
@@ -29,3 +30,4 @@ class EventScheduler(Thread):
                 while len(self.timed_events) > 0 and self.timed_events[0].event_time < current_time:
                     timed_event = self.timed_events.pop(0)
                     self.event_queue.put(timed_event.event)
+            time.sleep(0.5)
