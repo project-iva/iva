@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/iva_communicator.iml" filepath="$PROJECT_DIR$/.idea/iva_communicator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/iva.iml" filepath="$PROJECT_DIR$/.idea/iva.iml" />
     </modules>
   </component>
 </project>
