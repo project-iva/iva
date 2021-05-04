@@ -1,7 +1,7 @@
 import uuid as uuid
 from websockets import WebSocketServerProtocol
 
-from websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
+from frontend.websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
 
 
 class WebsocketMessageHandler:

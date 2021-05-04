@@ -3,17 +3,17 @@ from threading import Thread
 from typing import Dict
 
 from event_handler import EventHandler
-from iva_communicator import IvaCommunicator
+from frontend.frontend_socket_server import FrontendSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
 Listener = Dict[str, Queue]
 
 
 class Iva(Thread):
-    def __init__(self, event_queue: Queue, communicator: IvaCommunicator):
+    def __init__(self, event_queue: Queue, frontend_socket_server: FrontendSocketServer):
         super().__init__()
         self.event_queue = event_queue
-        self.communicator = communicator
+        self.frontend_socket_server = frontend_socket_server
         self.listeners: Listener = {}
 
     def register_listener(self, id: str, queue: Queue):
@@ -29,6 +29,6 @@ class Iva(Thread):
                 listener.put(event)
             else:
                 print('starting event handler')
-                handler = EventHandler(event, self, self.communicator)
+                handler = EventHandler(event, self, self.frontend_socket_server)
                 handler.start()
             self.event_queue.task_done()

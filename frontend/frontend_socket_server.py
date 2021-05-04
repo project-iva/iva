@@ -5,11 +5,11 @@ from typing import List
 import websockets
 from websockets import WebSocketServerProtocol
 
-from websocket_message import WebSocketMessage
-from websocket_message_handler import WebsocketMessageHandler
+from frontend.websocket_message import WebSocketMessage
+from frontend.websocket_message_handler import WebsocketMessageHandler
 
 
-class IvaCommunicator(Thread):
+class FrontendSocketServer(Thread):
     def __init__(self, uri: str, port: int):
         super().__init__()
         self.__uri = uri

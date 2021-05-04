@@ -6,12 +6,12 @@ from threading import Thread
 import uuid
 
 from event import Event
-from iva_communicator import IvaCommunicator
-from websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
+from frontend.frontend_socket_server import FrontendSocketServer
+from frontend.websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
 
 
 class EventHandler(Thread):
-    def __init__(self, event: Event, iva: Iva, communicator: IvaCommunicator):
+    def __init__(self, event: Event, iva: Iva, communicator: FrontendSocketServer):
         super().__init__()
         self.event = event
         self.iva = iva
