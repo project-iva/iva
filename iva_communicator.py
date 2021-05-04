@@ -1,11 +1,11 @@
 import asyncio
 from threading import Thread
-import uuid as uuid
-import websockets
 from typing import List
+
+import websockets
 from websockets import WebSocketServerProtocol
 
-from websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
+from websocket_message import WebSocketMessage
 from websocket_message_handler import WebsocketMessageHandler
 
 
