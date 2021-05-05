@@ -20,10 +20,7 @@ class EventHandler(Thread):
     def run(self):
         print(self.event)
         event_loop = asyncio.new_event_loop()
-        if self.event.name == 'MORNING':
-            print("handling morning")
-            event_loop.run_until_complete(self.__handle_morning_routine_event())
-            # self.communicator.start_morning_routine()
+        event_loop.run_until_complete(self.__handle_morning_routine_event())
 
     async def __handle_morning_routine_event(self):
         for step in range(1, 6):
@@ -40,7 +37,7 @@ class EventHandler(Thread):
             await self.communicator.send_message(message)
 
         event_queue = Queue()
-        self.iva.register_listener('MORNING_CALLBACK', event_queue)
+        self.iva.register_listener(uuid.UUID('e102589b-36b3-4624-86cb-51180cf3865c'), event_queue)
         event = event_queue.get()
         print(f'got response: {event}')
         routine_finished_message = WebSocketMessage(str(uuid.uuid4()), WebSocketMessageType.REQUEST,

@@ -1,11 +1,12 @@
 import datetime
+import uuid
 from datetime import timedelta
 from queue import Queue
 
-from event import Event, TimedEvent
+from event import TimedEvent, StartMorningRoutineEvent, AwaitedEvent
 from event_scheduler import EventScheduler
-from iva import Iva
 from frontend.frontend_socket_server import FrontendSocketServer
+from iva import Iva
 
 
 def main():
@@ -20,8 +21,8 @@ def main():
     iva = Iva(event_queue, frontend_socket_server)
     iva.start()
 
-    event_scheduler.add_timed_event(TimedEvent(Event('MORNING'), datetime.datetime.now() + timedelta(seconds=3)))
-    event_scheduler.add_timed_event(TimedEvent(Event('MORNING_CALLBACK'), datetime.datetime.now() + timedelta(seconds=10)))
+    event_scheduler.add_timed_event(TimedEvent(StartMorningRoutineEvent(), datetime.datetime.now() + timedelta(seconds=3)))
+    event_scheduler.add_timed_event(TimedEvent(AwaitedEvent(uuid.UUID('e102589b-36b3-4624-86cb-51180cf3865c')), datetime.datetime.now() + timedelta(seconds=10)))
 
 
 main()
