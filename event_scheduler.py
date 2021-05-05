@@ -1,9 +1,11 @@
 import time
 from queue import Queue
 from threading import Thread, RLock
-from datetime import datetime
-from event import Event, TimedEvent
+from datetime import datetime, timedelta
 from sortedcontainers import SortedList
+
+from events.events import Event
+from events.timed_events import TimedEvent, DailyTimedEvent
 
 
 class EventScheduler(Thread):
@@ -29,5 +31,11 @@ class EventScheduler(Thread):
                 current_time = datetime.now()
                 while len(self.timed_events) > 0 and self.timed_events[0].event_time < current_time:
                     timed_event = self.timed_events.pop(0)
+                    if isinstance(timed_event, DailyTimedEvent):
+                        # schedule the daily event for the next day again
+                        timed_event.event_time = timed_event.event_time + timedelta(days=1)
+                        # TODO: it may be better to create a copy of the event with an unique uuid
+                        self.add_timed_event(timed_event)
+
                     self.event_queue.put(timed_event.event)
             time.sleep(0.5)

@@ -4,8 +4,8 @@ from typing import Dict
 
 from uuid import UUID
 
-from event import AwaitedEvent, StartMorningRoutineEvent
 from event_handler import EventHandler
+from events.events import AwaitedEvent, StartMorningRoutineEvent
 from frontend.frontend_socket_server import FrontendSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data

@@ -2,12 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from uuid import UUID, uuid4
-
-
-@dataclass
-class Event:
-    uuid: UUID = uuid4()
+from events.events import Event
 
 
 @dataclass
@@ -20,10 +15,5 @@ class TimedEvent:
 
 
 @dataclass
-class AwaitedEvent(Event):
-    pass
-
-
-@dataclass
-class StartMorningRoutineEvent(Event):
+class DailyTimedEvent(TimedEvent):
     pass

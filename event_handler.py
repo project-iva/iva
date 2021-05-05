@@ -5,7 +5,7 @@ from threading import Thread
 
 import uuid
 
-from event import Event
+from events.events import Event
 from frontend.frontend_socket_server import FrontendSocketServer
 from frontend.websocket_message import WebSocketMessage, WebSocketMessageType, WebSocketMessageAction
 
