@@ -13,9 +13,10 @@ Listener = Dict[UUID, Queue]
 
 
 class Iva(Thread):
-    def __init__(self, event_queue: Queue, frontend_socket_server: FrontendSocketServer):
+    def __init__(self, event_queue: Queue, awaited_event_queue: Queue, frontend_socket_server: FrontendSocketServer):
         super().__init__()
         self.event_queue = event_queue
+        self.awaited_event_queue = awaited_event_queue
         self.frontend_socket_server = frontend_socket_server
         self.listeners: Listener = {}
         self.dispatcher = {
@@ -25,6 +26,7 @@ class Iva(Thread):
 
     def register_listener(self, uuid: UUID, queue: Queue):
         self.listeners[uuid] = queue
+        self.awaited_event_queue.put(AwaitedEvent(uuid))
 
     def run(self):
         while True:
