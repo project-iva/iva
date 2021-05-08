@@ -1,5 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from queue import Empty
+from queue import Empty, Queue
 
 
 class PostHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -17,7 +17,7 @@ class PostHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 class SimpleHTTPServer(HTTPServer):
-    def __init__(self, awaited_event_queue, event_queue):
+    def __init__(self, awaited_event_queue: Queue, event_queue: Queue):
         super().__init__(('localhost', 8080), PostHTTPRequestHandler)
         self.awaited_event_queue = awaited_event_queue
         self.event_queue = event_queue
