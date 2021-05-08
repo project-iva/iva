@@ -23,6 +23,7 @@ class EventHandler(Thread):
         event_loop.run_until_complete(self.__handle_morning_routine_event())
 
     async def __handle_morning_routine_event(self):
+        event_queue = Queue(1)
         for step in range(1, 6):
             data = {
                 'step_number': step,
@@ -36,10 +37,11 @@ class EventHandler(Thread):
                                        WebSocketMessageAction.MORNING_ROUTINE_UPDATE, data)
             await self.communicator.send_message(message)
 
-        event_queue = Queue()
-        self.iva.register_listener(uuid.UUID('e102589b-36b3-4624-86cb-51180cf3865c'), event_queue)
-        event = event_queue.get()
-        print(f'got response: {event}')
+            self.iva.register_listener(uuid.uuid4(), event_queue)
+            event = event_queue.get()
+            event_queue.task_done()
+            print(f'got response: {event}')
+
         routine_finished_message = WebSocketMessage(str(uuid.uuid4()), WebSocketMessageType.REQUEST,
                                                     WebSocketMessageAction.MORNING_ROUTINE_FINISHED, {})
         await self.communicator.send_message(routine_finished_message)

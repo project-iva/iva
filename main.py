@@ -25,7 +25,7 @@ def main():
     iva = Iva(event_queue, awaited_event_queue, frontend_socket_server)
     iva.start()
 
-    event_scheduler.add_timed_event(DailyTimedEvent(StartMorningRoutineEvent(), datetime.datetime.now() + timedelta(seconds=3)))
+    event_scheduler.add_timed_event(DailyTimedEvent(StartMorningRoutineEvent(), datetime.datetime.now() + timedelta(seconds=5)))
 
     server = SimpleHTTPServer(awaited_event_queue, event_queue)
     server_thread = threading.Thread(target=server.serve_forever)
