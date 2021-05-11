@@ -1,12 +1,11 @@
 import datetime
 import threading
-import uuid
 from datetime import timedelta
 from queue import Queue
 
 from event_scheduler import EventScheduler
-from events.events import StartMorningRoutineEvent, AwaitedEvent
-from events.timed_events import TimedEvent, DailyTimedEvent
+from events.events import StartMorningRoutineEvent
+from events.timed_events import DailyTimedEvent
 from frontend.frontend_socket_server import FrontendSocketServer
 from http_server.http_server import SimpleHTTPServer
 from iva import Iva
