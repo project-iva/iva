@@ -15,3 +15,8 @@ class AwaitedEvent(Event):
 @dataclass
 class StartMorningRoutineEvent(Event):
     pass
+
+
+@dataclass
+class StartEveningRoutineEvent(Event):
+    pass

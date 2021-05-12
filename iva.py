@@ -4,8 +4,9 @@ from typing import Dict
 
 from uuid import UUID
 
-from event_handler import EventHandler
-from events.events import AwaitedEvent, StartMorningRoutineEvent
+from event_handlers.evening_routine_handler import EveningRoutineEventHandler
+from event_handlers.morning_routine_event_handler import MorningRoutineEventHandler
+from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent
 from frontend.frontend_socket_server import FrontendSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
@@ -21,7 +22,8 @@ class Iva(Thread):
         self.listeners: Listener = {}
         self.dispatcher = {
             AwaitedEvent: self.__handle_awaited_event,
-            StartMorningRoutineEvent: self.__handle_start_morning_routine_event
+            StartMorningRoutineEvent: self.__handle_start_morning_routine_event,
+            StartEveningRoutineEvent: self.__handle_start_evening_routine_event
         }
 
     def register_listener(self, uuid: UUID, queue: Queue):
@@ -40,5 +42,9 @@ class Iva(Thread):
             listener.put(awaited_event)
 
     def __handle_start_morning_routine_event(self, start_morning_routine_event: StartMorningRoutineEvent):
-        handler = EventHandler(start_morning_routine_event, self, self.frontend_socket_server)
+        handler = MorningRoutineEventHandler(start_morning_routine_event, self, self.frontend_socket_server)
+        handler.start()
+
+    def __handle_start_evening_routine_event(self, start_evening_routine_event: StartEveningRoutineEvent):
+        handler = EveningRoutineEventHandler(start_evening_routine_event, self, self.frontend_socket_server)
         handler.start()
