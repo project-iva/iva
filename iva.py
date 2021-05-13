@@ -7,7 +7,7 @@ from uuid import UUID
 from event_handlers.evening_routine_handler import EveningRoutineEventHandler
 from event_handlers.morning_routine_event_handler import MorningRoutineEventHandler
 from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent
-from frontend.frontend_socket_server import FrontendSocketServer
+from websocket.server import FrontendSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
 Listener = Dict[UUID, Queue]

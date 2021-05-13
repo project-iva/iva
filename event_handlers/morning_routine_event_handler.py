@@ -1,5 +1,5 @@
 from event_handlers.routine_handler import RoutineEventHandler
-from frontend.websocket_message import WebSocketMessageAction
+from websocket.message import WebSocketMessageAction
 
 
 class MorningRoutineEventHandler(RoutineEventHandler):

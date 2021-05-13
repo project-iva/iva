@@ -6,8 +6,8 @@ from queue import Queue
 from threading import Thread
 
 from events.events import Event
-from frontend.frontend_socket_server import FrontendSocketServer
-from frontend.websocket_message import WebSocketMessageAction, WebSocketMessage, WebSocketMessageType
+from websocket.server import FrontendSocketServer
+from websocket.message import WebSocketMessageAction, WebSocketMessage, WebSocketMessageType
 
 
 class RoutineEventHandler(Thread, metaclass=ABCMeta):
