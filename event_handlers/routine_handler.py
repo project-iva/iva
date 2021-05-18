@@ -6,12 +6,12 @@ from queue import Queue
 from threading import Thread
 
 from events.events import Event
-from websocket.server import FrontendSocketServer
-from websocket.message import WebSocketMessageAction, WebSocketMessage, WebSocketMessageType
+from websocket.server import WebSocketServer
+from websocket.message import WebSocketMessageAction, FrontendWebSocketMessage, WebSocketMessageType
 
 
 class RoutineEventHandler(Thread, metaclass=ABCMeta):
-    def __init__(self, event: Event, iva: Iva, communicator: FrontendSocketServer):
+    def __init__(self, event: Event, iva: Iva, communicator: WebSocketServer):
         super().__init__()
         self.event = event
         self.iva = iva
@@ -30,9 +30,10 @@ class RoutineEventHandler(Thread, metaclass=ABCMeta):
         print(f'got response: {event}')
 
     async def send_routine_message(self, action: WebSocketMessageAction, data: dict):
-        message = WebSocketMessage(str(uuid.uuid4()), WebSocketMessageType.REQUEST, action, data)
+        message = FrontendWebSocketMessage(str(uuid.uuid4()), type=WebSocketMessageType.REQUEST, action=action,
+                                           data=data)
         await self.communicator.send_message(message)
 
     @abstractmethod
-    def handle(self):
+    async def handle(self):
         pass

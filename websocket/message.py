@@ -1,4 +1,5 @@
 import json
+from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -17,8 +18,24 @@ class WebSocketMessageAction(str, Enum):
 
 
 @dataclass
-class WebSocketMessage:
+class WebsocketMessage(metaclass=ABCMeta):
     id: str
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, d):
+        pass
+
+    @classmethod
+    def from_json(cls, j):
+        return cls.from_dict(json.loads(j))
+
+    def to_json(self) -> str:
+        return json.dumps(asdict(self))
+
+
+@dataclass
+class FrontendWebSocketMessage(WebsocketMessage):
     type: WebSocketMessageType
     action: WebSocketMessageAction
     data: dict
@@ -31,10 +48,3 @@ class WebSocketMessage:
             WebSocketMessageAction(d.get('action')),
             d.get('data', {})
         )
-
-    @classmethod
-    def from_json(cls, j):
-        return cls.from_dict(json.loads(j))
-
-    def to_json(self) -> str:
-        return json.dumps(asdict(self))

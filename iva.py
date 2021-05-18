@@ -7,14 +7,14 @@ from uuid import UUID
 from event_handlers.evening_routine_handler import EveningRoutineEventHandler
 from event_handlers.morning_routine_event_handler import MorningRoutineEventHandler
 from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent
-from websocket.server import FrontendSocketServer
+from websocket.server import WebSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
 Listener = Dict[UUID, Queue]
 
 
 class Iva(Thread):
-    def __init__(self, event_queue: Queue, awaited_event_queue: Queue, frontend_socket_server: FrontendSocketServer):
+    def __init__(self, event_queue: Queue, awaited_event_queue: Queue, frontend_socket_server: WebSocketServer):
         super().__init__()
         self.event_queue = event_queue
         self.awaited_event_queue = awaited_event_queue

@@ -6,7 +6,7 @@ from queue import Queue
 from event_scheduler import EventScheduler
 from events.events import StartMorningRoutineEvent, StartEveningRoutineEvent
 from events.timed_events import DailyTimedEvent
-from websocket.server import FrontendSocketServer
+from websocket.server import WebSocketServer
 from http_server.http_server import SimpleHTTPServer
 from iva import Iva
 
@@ -18,7 +18,7 @@ def main():
     event_scheduler = EventScheduler(event_queue)
     event_scheduler.start()
 
-    frontend_socket_server = FrontendSocketServer('0.0.0.0', 5678)
+    frontend_socket_server = WebSocketServer('0.0.0.0', 5678)
     frontend_socket_server.start()
 
     iva = Iva(event_queue, awaited_event_queue, frontend_socket_server)

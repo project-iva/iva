@@ -6,8 +6,8 @@ from typing import List, Dict, Optional
 import websockets
 from websockets import WebSocketServerProtocol
 
-from websocket.message import WebSocketMessage
-from websocket.message_handler import WebsocketMessageHandler
+from websocket.message import FrontendWebSocketMessage, WebsocketMessage
+from websocket.handler import WebSocketConnectionHandler
 
 
 class WebSocketClientType(str, Enum):
@@ -15,12 +15,13 @@ class WebSocketClientType(str, Enum):
     APP = 'ios'
 
 
-class FrontendSocketServer(Thread):
+# TODO: switch to autobahn package to avoid dealing with asyncio
+class WebSocketServer(Thread):
     def __init__(self, uri: str, port: int):
         super().__init__()
         self.__uri = uri
         self.__port = port
-        self.__connected_clients: Dict[WebSocketClientType, List[WebsocketMessageHandler]] = {
+        self.__connected_clients: Dict[WebSocketClientType, List[WebSocketConnectionHandler]] = {
             WebSocketClientType.WEB_INTERFACE: [],
             WebSocketClientType.APP: []
         }
@@ -32,16 +33,19 @@ class FrontendSocketServer(Thread):
         server_loop.run_forever()
 
     async def __handler(self, websocket: WebSocketServerProtocol, path: str):
-        websocket_message_handler = WebsocketMessageHandler(websocket)
+        websocket_connection_handler = WebSocketConnectionHandler(websocket)
         # get rid of the prefixed slash and get type
         connection_type = WebSocketClientType(path[1:])
         print(f'new connection; type: {connection_type}')
-        self.__connected_clients[connection_type].append(websocket_message_handler)
+        self.__connected_clients[connection_type].append(websocket_connection_handler)
         async for message in websocket:
-            websocket_message = WebSocketMessage.from_json(message)
-            await websocket_message_handler.handle_message(websocket_message)
+            websocket_message = FrontendWebSocketMessage.from_json(message)
+            await websocket_connection_handler.handle_message(websocket_message)
 
-    async def send_message(self, message: WebSocketMessage, client_types: Optional[List[WebSocketClientType]] = None):
+        # iteration terminates when the client disconnects
+        self.__connected_clients[connection_type].remove(websocket_connection_handler)
+
+    async def send_message(self, message: WebsocketMessage, client_types: Optional[List[WebSocketClientType]] = None):
         if client_types is None:
             client_types = [WebSocketClientType.WEB_INTERFACE, WebSocketClientType.APP]
 
