@@ -12,6 +12,7 @@ from iva import Iva
 
 
 def main():
+    print('Starting IVA...')
     event_queue = Queue()
     awaited_event_queue = Queue()
 

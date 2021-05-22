@@ -9,6 +9,9 @@ verify_ssl = true
 websockets = "*"
 uuid = "*"
 sortedcontainers = "*"
+watchdog = "*"
+pyyaml = "*"
+argh = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"

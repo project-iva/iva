@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  iva:
+    build:
+      context: .
+    command: watchmedo auto-restart -p "*.py" -R python3 -- main.py
+    volumes:
+      - .:/usr/src/app/
