@@ -7,3 +7,16 @@ services:
     command: watchmedo auto-restart -p "*.py" -R python3 -- main.py
     volumes:
       - .:/usr/src/app/
+    ports:
+    - 5678:5678
+    - 8001:8001
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:iva.docker.localhost
+      - traefik.docker.network=iva_network
+    networks:
+      - iva_network
+
+networks:
+  iva_network:
+    name: iva_network

@@ -18,6 +18,6 @@ class PostHTTPRequestHandler(BaseHTTPRequestHandler):
 
 class SimpleHTTPServer(HTTPServer):
     def __init__(self, awaited_event_queue: Queue, event_queue: Queue):
-        super().__init__(('0.0.0.0', 8080), PostHTTPRequestHandler)
+        super().__init__(('0.0.0.0', 8001), PostHTTPRequestHandler)
         self.awaited_event_queue = awaited_event_queue
         self.event_queue = event_queue
