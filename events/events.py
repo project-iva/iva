@@ -8,8 +8,8 @@ class Event:
 
 
 @dataclass
-class AwaitedEvent(Event):
-    pass
+class AwaitedEvent:
+    event: Event
 
 
 @dataclass
@@ -19,4 +19,9 @@ class StartMorningRoutineEvent(Event):
 
 @dataclass
 class StartEveningRoutineEvent(Event):
+    pass
+
+
+@dataclass
+class MindfulSessionRecordedEvent(Event):
     pass
