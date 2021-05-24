@@ -30,7 +30,6 @@ class PostHTTPRequestHandler(BaseHTTPRequestHandler):
             print(f'Invalid path: {self.path}')
 
     def handle_next(self):
-        print('Handling POST to /next')
         try:
             awaited_uuid = self.server.awaited_event_uuids.popleft()
             self.server.event_queue.put(AwaitedEvent(Event(awaited_uuid)))
@@ -38,7 +37,6 @@ class PostHTTPRequestHandler(BaseHTTPRequestHandler):
             pass
 
     def handle_mindful_session_recorded(self):
-        print('Handling POST to /next')
         awaited_event = AwaitedEvent(MindfulSessionRecordedEvent())
         self.server.event_queue.put(awaited_event)
 

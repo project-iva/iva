@@ -1,8 +1,7 @@
 from collections import deque
 from queue import Queue
 from threading import Thread
-from typing import Dict, Type, List
-
+from typing import Dict, Type
 from uuid import UUID
 
 from event_handlers.evening_routine_handler import EveningRoutineEventHandler
