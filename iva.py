@@ -4,9 +4,12 @@ from threading import Thread
 from typing import Dict, Type
 from uuid import UUID
 
+from event_handlers.command_handler import CommandHandler
 from event_handlers.evening_routine_handler import EveningRoutineEventHandler
 from event_handlers.morning_routine_event_handler import MorningRoutineEventHandler
-from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent, Event
+from event_scheduler import EventScheduler
+from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent, Event, CommandEvent, \
+    UtteranceEvent
 from websocket.server import WebSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
@@ -15,17 +18,20 @@ EventTypeListener = Dict[Type[Event], Queue]
 
 
 class Iva(Thread):
-    def __init__(self, event_queue: Queue, awaited_event_uuids: deque, frontend_socket_server: WebSocketServer):
+    def __init__(self, event_queue: Queue, awaited_event_uuids: deque, event_scheduler: EventScheduler, frontend_socket_server: WebSocketServer):
         super().__init__()
         self.event_queue = event_queue
         self.awaited_event_uuids = awaited_event_uuids
+        self.event_scheduler = event_scheduler
         self.frontend_socket_server = frontend_socket_server
         self.event_uuid_listeners: EventUuidListener = {}
         self.event_type_listeners: EventTypeListener = {}
         self.dispatcher = {
             AwaitedEvent: self.__handle_awaited_event,
             StartMorningRoutineEvent: self.__handle_start_morning_routine_event,
-            StartEveningRoutineEvent: self.__handle_start_evening_routine_event
+            StartEveningRoutineEvent: self.__handle_start_evening_routine_event,
+            CommandEvent: self.__handle_command_event,
+            UtteranceEvent: self.__handle_utterance_event
         }
 
     def register_event_uuid_listener(self, uuid: UUID, queue: Queue):
@@ -74,3 +80,10 @@ class Iva(Thread):
     def __handle_start_evening_routine_event(self, start_evening_routine_event: StartEveningRoutineEvent):
         handler = EveningRoutineEventHandler(start_evening_routine_event, self, self.frontend_socket_server)
         handler.start()
+
+    def __handle_command_event(self, command_event: CommandEvent):
+        handler = CommandHandler(command_event, self.event_scheduler)
+        handler.start()
+
+    def __handle_utterance_event(self, utterance_event: UtteranceEvent):
+        pass

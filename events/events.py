@@ -25,3 +25,13 @@ class StartEveningRoutineEvent(Event):
 @dataclass
 class MindfulSessionRecordedEvent(Event):
     pass
+
+
+@dataclass
+class CommandEvent(Event):
+    command: str = ""
+
+
+@dataclass
+class UtteranceEvent(Event):
+    utterance: str = ""

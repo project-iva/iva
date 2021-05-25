@@ -17,11 +17,11 @@ class EventScheduler(Thread):
 
     def schedule_event(self, event: Event, event_time: datetime = None):
         if event_time:
-            self.add_timed_event(TimedEvent(event, event_time))
+            self.schedule_timed_event(TimedEvent(event, event_time))
         else:
             self.event_queue.put(event)
 
-    def add_timed_event(self, timed_event: TimedEvent):
+    def schedule_timed_event(self, timed_event: TimedEvent):
         with self.lock:
             self.timed_events.add(timed_event)
 
@@ -35,7 +35,7 @@ class EventScheduler(Thread):
                         # schedule the daily event for the next day again
                         timed_event.event_time = timed_event.event_time + timedelta(days=1)
                         # TODO: it may be better to create a copy of the event with an unique uuid
-                        self.add_timed_event(timed_event)
+                        self.schedule_timed_event(timed_event)
 
                     self.event_queue.put(timed_event.event)
             time.sleep(0.5)

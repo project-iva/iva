@@ -12,6 +12,8 @@ sortedcontainers = "*"
 watchdog = "*"
 pyyaml = "*"
 argh = "*"
+slackclient = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.9"
