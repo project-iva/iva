@@ -7,8 +7,9 @@ from threading import Thread
 from typing import Type
 
 from events.events import Event
-from websocket.server import WebSocketServer
-from websocket.message import WebSocketMessageAction, FrontendWebSocketMessage, WebSocketMessageType
+from websocket.server import WebSocketServer, WebSocketClientType
+from websocket.message import WebSocketMessageAction, FrontendWebSocketMessage, WebSocketMessageType, \
+    RaspberryWebSocketMessage, RaspberrySocketMessageAction
 
 
 class RoutineEventHandler(Thread, metaclass=ABCMeta):
@@ -54,7 +55,15 @@ class RoutineEventHandler(Thread, metaclass=ABCMeta):
     async def send_routine_message(self, action: WebSocketMessageAction, data: dict):
         message = FrontendWebSocketMessage(str(uuid.uuid4()), type=WebSocketMessageType.REQUEST, action=action,
                                            data=data)
-        await self.communicator.send_message(message)
+        await self.communicator.send_message(message, [WebSocketClientType.WEB_INTERFACE])
+
+    async def turn_screen_on(self):
+        message = RaspberryWebSocketMessage(str(uuid.uuid4()), action=RaspberrySocketMessageAction.SCREEN_ON)
+        await self.communicator.send_message(message, [WebSocketClientType.RASPBERRY])
+
+    async def turn_screen_off(self):
+        message = RaspberryWebSocketMessage(str(uuid.uuid4()), action=RaspberrySocketMessageAction.SCREEN_OFF)
+        await self.communicator.send_message(message, [WebSocketClientType.RASPBERRY])
 
     @abstractmethod
     async def handle(self):

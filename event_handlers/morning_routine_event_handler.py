@@ -7,6 +7,8 @@ from websocket.message import WebSocketMessageAction
 
 class MorningRoutineEventHandler(RoutineEventHandler):
     async def handle(self):
+        await self.turn_screen_on()
+
         start_routine_data = {
             'routine_name': 'morning_routine'
         }

@@ -13,6 +13,7 @@ from websocket.handler import WebSocketConnectionHandler
 class WebSocketClientType(str, Enum):
     WEB_INTERFACE = 'web'
     APP = 'ios'
+    RASPBERRY = 'raspberry'
 
 
 # TODO: switch to autobahn package to avoid dealing with asyncio
@@ -21,10 +22,14 @@ class WebSocketServer(Thread):
         super().__init__()
         self.__uri = uri
         self.__port = port
-        self.__connected_clients: Dict[WebSocketClientType, List[WebSocketConnectionHandler]] = {
-            WebSocketClientType.WEB_INTERFACE: [],
-            WebSocketClientType.APP: []
-        }
+        self.__connected_clients = self.__create_clients_mapping()
+
+    def __create_clients_mapping(self) -> Dict[WebSocketClientType, List[WebSocketConnectionHandler]]:
+        clients: Dict[WebSocketClientType, List[WebSocketConnectionHandler]] = {}
+        # initialize client list for all possible connection types
+        for client_type in list(WebSocketClientType):
+            clients[client_type] = []
+        return clients
 
     def run(self):
         server_loop = asyncio.new_event_loop()

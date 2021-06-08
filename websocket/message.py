@@ -17,6 +17,11 @@ class WebSocketMessageAction(str, Enum):
     FINISH_ROUTINE = 'finish_routine',
 
 
+class RaspberrySocketMessageAction(str, Enum):
+    SCREEN_ON = 'screen_on'
+    SCREEN_OFF = 'screen_off'
+
+
 @dataclass
 class WebsocketMessage(metaclass=ABCMeta):
     id: str
@@ -47,4 +52,16 @@ class FrontendWebSocketMessage(WebsocketMessage):
             WebSocketMessageType(d.get('type')),
             WebSocketMessageAction(d.get('action')),
             d.get('data', {})
+        )
+
+
+@dataclass
+class RaspberryWebSocketMessage(WebsocketMessage):
+    action: RaspberrySocketMessageAction
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            d.get('id'),
+            RaspberrySocketMessageAction(d.get('action')),
         )
