@@ -13,11 +13,11 @@ from websocket.message import WebSocketMessageAction, FrontendWebSocketMessage, 
 
 
 class RoutineEventHandler(Thread, metaclass=ABCMeta):
-    def __init__(self, event: Event, iva: Iva, communicator: WebSocketServer):
+    def __init__(self, event: Event, iva: Iva, websocket_server: WebSocketServer):
         super().__init__()
         self.event = event
         self.iva = iva
-        self.communicator = communicator
+        self.websocket_server = websocket_server
         self.event_queue = Queue(1)
 
     def run(self):
@@ -55,15 +55,15 @@ class RoutineEventHandler(Thread, metaclass=ABCMeta):
     async def send_routine_message(self, action: WebSocketMessageAction, data: dict):
         message = FrontendWebSocketMessage(str(uuid.uuid4()), type=WebSocketMessageType.REQUEST, action=action,
                                            data=data)
-        await self.communicator.send_message(message, [WebSocketClientType.WEB_INTERFACE])
+        await self.websocket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
 
     async def turn_screen_on(self):
         message = RaspberryWebSocketMessage(str(uuid.uuid4()), action=RaspberrySocketMessageAction.SCREEN_ON)
-        await self.communicator.send_message(message, [WebSocketClientType.RASPBERRY])
+        await self.websocket_server.send_message(message, [WebSocketClientType.RASPBERRY])
 
     async def turn_screen_off(self):
         message = RaspberryWebSocketMessage(str(uuid.uuid4()), action=RaspberrySocketMessageAction.SCREEN_OFF)
-        await self.communicator.send_message(message, [WebSocketClientType.RASPBERRY])
+        await self.websocket_server.send_message(message, [WebSocketClientType.RASPBERRY])
 
     @abstractmethod
     async def handle(self):

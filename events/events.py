@@ -35,3 +35,18 @@ class CommandEvent(Event):
 @dataclass
 class UtteranceEvent(Event):
     utterance: str = ""
+
+
+@dataclass
+class RaspberryEvent(Event):
+    pass
+
+
+@dataclass
+class TurnRaspberryScreenOnEvent(RaspberryEvent):
+    pass
+
+
+@dataclass
+class TurnRaspberryScreenOffEvent(RaspberryEvent):
+    pass

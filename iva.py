@@ -7,9 +7,10 @@ from uuid import UUID
 from event_handlers.command_handler import CommandHandler
 from event_handlers.evening_routine_handler import EveningRoutineEventHandler
 from event_handlers.morning_routine_event_handler import MorningRoutineEventHandler
+from event_handlers.raspberry_event_handler import RaspberryEventHandler
 from event_scheduler import EventScheduler
 from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent, Event, CommandEvent, \
-    UtteranceEvent
+    UtteranceEvent, RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent
 from websocket.server import WebSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
@@ -18,12 +19,13 @@ EventTypeListener = Dict[Type[Event], Queue]
 
 
 class Iva(Thread):
-    def __init__(self, event_queue: Queue, awaited_event_uuids: deque, event_scheduler: EventScheduler, frontend_socket_server: WebSocketServer):
+    def __init__(self, event_queue: Queue, awaited_event_uuids: deque, event_scheduler: EventScheduler,
+                 socket_server: WebSocketServer):
         super().__init__()
         self.event_queue = event_queue
         self.awaited_event_uuids = awaited_event_uuids
         self.event_scheduler = event_scheduler
-        self.frontend_socket_server = frontend_socket_server
+        self.socket_server = socket_server
         self.event_uuid_listeners: EventUuidListener = {}
         self.event_type_listeners: EventTypeListener = {}
         self.dispatcher = {
@@ -31,7 +33,9 @@ class Iva(Thread):
             StartMorningRoutineEvent: self.__handle_start_morning_routine_event,
             StartEveningRoutineEvent: self.__handle_start_evening_routine_event,
             CommandEvent: self.__handle_command_event,
-            UtteranceEvent: self.__handle_utterance_event
+            UtteranceEvent: self.__handle_utterance_event,
+            TurnRaspberryScreenOnEvent: self.__handle_raspberry_event,
+            TurnRaspberryScreenOffEvent: self.__handle_raspberry_event
         }
 
     def register_event_uuid_listener(self, uuid: UUID, queue: Queue):
@@ -74,11 +78,11 @@ class Iva(Thread):
         print(f'There are no listeners for AwaitedEvent: {awaited_event}')
 
     def __handle_start_morning_routine_event(self, start_morning_routine_event: StartMorningRoutineEvent):
-        handler = MorningRoutineEventHandler(start_morning_routine_event, self, self.frontend_socket_server)
+        handler = MorningRoutineEventHandler(start_morning_routine_event, self, self.socket_server)
         handler.start()
 
     def __handle_start_evening_routine_event(self, start_evening_routine_event: StartEveningRoutineEvent):
-        handler = EveningRoutineEventHandler(start_evening_routine_event, self, self.frontend_socket_server)
+        handler = EveningRoutineEventHandler(start_evening_routine_event, self, self.socket_server)
         handler.start()
 
     def __handle_command_event(self, command_event: CommandEvent):
@@ -87,3 +91,7 @@ class Iva(Thread):
 
     def __handle_utterance_event(self, utterance_event: UtteranceEvent):
         pass
+
+    def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
+        handler = RaspberryEventHandler(raspberry_event, self.socket_server)
+        handler.start()
