@@ -4,13 +4,14 @@ from threading import Thread
 from typing import Dict, Type
 from uuid import UUID
 
+from event_handlers.choose_meal_handler import ChooseMealHandler
 from event_handlers.command_handler import CommandHandler
 from event_handlers.evening_routine_handler import EveningRoutineEventHandler
 from event_handlers.morning_routine_event_handler import MorningRoutineEventHandler
 from event_handlers.raspberry_event_handler import RaspberryEventHandler
 from event_scheduler import EventScheduler
 from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent, Event, CommandEvent, \
-    UtteranceEvent, RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent
+    UtteranceEvent, RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent, ChooseMealEvent
 from websocket.server import WebSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
@@ -35,7 +36,8 @@ class Iva(Thread):
             CommandEvent: self.__handle_command_event,
             UtteranceEvent: self.__handle_utterance_event,
             TurnRaspberryScreenOnEvent: self.__handle_raspberry_event,
-            TurnRaspberryScreenOffEvent: self.__handle_raspberry_event
+            TurnRaspberryScreenOffEvent: self.__handle_raspberry_event,
+            ChooseMealEvent: self.__handle_choose_meal_event
         }
 
     def register_event_uuid_listener(self, uuid: UUID, queue: Queue):
@@ -94,4 +96,8 @@ class Iva(Thread):
 
     def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
         handler = RaspberryEventHandler(raspberry_event, self.socket_server)
+        handler.start()
+
+    def __handle_choose_meal_event(self, choose_meal_event: ChooseMealEvent):
+        handler = ChooseMealHandler(choose_meal_event)
         handler.start()

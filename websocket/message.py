@@ -1,7 +1,8 @@
-import json
-from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass, asdict
+from abc import ABCMeta
+from dataclasses import dataclass
 from enum import Enum
+
+from json_model import JsonModel
 
 
 class WebSocketMessageType(str, Enum):
@@ -23,20 +24,8 @@ class RaspberrySocketMessageAction(str, Enum):
 
 
 @dataclass
-class WebsocketMessage(metaclass=ABCMeta):
+class WebsocketMessage(JsonModel, metaclass=ABCMeta):
     id: str
-
-    @classmethod
-    @abstractmethod
-    def from_dict(cls, d):
-        pass
-
-    @classmethod
-    def from_json(cls, j):
-        return cls.from_dict(json.loads(j))
-
-    def to_json(self) -> str:
-        return json.dumps(asdict(self))
 
 
 @dataclass

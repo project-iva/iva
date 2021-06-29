@@ -5,6 +5,7 @@ from collections import deque
 from datetime import timedelta
 from queue import Queue
 
+from backend_client.client import BackendClient
 from event_scheduler import EventScheduler
 from events.events import StartMorningRoutineEvent, StartEveningRoutineEvent, CommandEvent
 from events.timed_events import DailyTimedEvent

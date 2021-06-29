@@ -50,3 +50,8 @@ class TurnRaspberryScreenOnEvent(RaspberryEvent):
 @dataclass
 class TurnRaspberryScreenOffEvent(RaspberryEvent):
     pass
+
+
+@dataclass
+class ChooseMealEvent(Event):
+    pass

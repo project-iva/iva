@@ -2,7 +2,7 @@ from threading import Thread
 
 from event_scheduler import EventScheduler
 from events.events import CommandEvent, StartMorningRoutineEvent, StartEveningRoutineEvent, TurnRaspberryScreenOnEvent, \
-    TurnRaspberryScreenOffEvent
+    TurnRaspberryScreenOffEvent, ChooseMealEvent
 
 
 class CommandHandler(Thread):
@@ -15,6 +15,7 @@ class CommandHandler(Thread):
             'start_evening_routine': self.__handle_start_evening_routine_command,
             'turn_screen_on': self.__handle_turn_screen_on_command,
             'turn_screen_off': self.__handle_turn_screen_off_command,
+            'choose_meal': self.__handle_choose_meal_command
         }
 
     def run(self):
@@ -35,3 +36,6 @@ class CommandHandler(Thread):
 
     def __handle_turn_screen_off_command(self):
         self.event_scheduler.schedule_event(TurnRaspberryScreenOffEvent())
+
+    def __handle_choose_meal_command(self):
+        self.event_scheduler.schedule_event(ChooseMealEvent())

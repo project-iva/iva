@@ -14,6 +14,7 @@ pyyaml = "*"
 argh = "*"
 slackclient = "*"
 python-dotenv = "*"
+requests = "*"
 
 [requires]
 python_version = "3.9"
