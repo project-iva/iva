@@ -23,8 +23,7 @@ class BackendClient:
     @staticmethod
     def post_chosen_meal(meal_id: int):
         chosen_meal = ChosenMeal(meal_id)
-        print(chosen_meal.to_json())
         base_api_url = BackendClient.get_backend_api_url()
         headers = {'Content-type': 'application/json'}
         response = requests.post(f'{base_api_url}/meal-tracking-entries/', headers=headers, data=chosen_meal.to_json())
-        print(response.status_code)
+        response.raise_for_status()

@@ -12,6 +12,7 @@ from event_handlers.raspberry_event_handler import RaspberryEventHandler
 from event_scheduler import EventScheduler
 from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent, Event, CommandEvent, \
     UtteranceEvent, RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent, ChooseMealEvent
+from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
 
 # TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
@@ -21,12 +22,13 @@ EventTypeListener = Dict[Type[Event], Queue]
 
 class Iva(Thread):
     def __init__(self, event_queue: Queue, awaited_event_uuids: deque, event_scheduler: EventScheduler,
-                 socket_server: WebSocketServer):
+                 socket_server: WebSocketServer, slack_client: SlackClientHandler):
         super().__init__()
         self.event_queue = event_queue
         self.awaited_event_uuids = awaited_event_uuids
         self.event_scheduler = event_scheduler
         self.socket_server = socket_server
+        self.slack_client = slack_client
         self.event_uuid_listeners: EventUuidListener = {}
         self.event_type_listeners: EventTypeListener = {}
         self.dispatcher = {
@@ -72,7 +74,7 @@ class Iva(Thread):
 
         # otherwise check if there is a listener for the specific type
         if listener := self.event_type_listeners.pop(type(awaited_event.event), None):
-            print('passing event to an uuid listener')
+            print('passing event to a type listener')
             listener.put(awaited_event.event)
             return
 
@@ -99,5 +101,5 @@ class Iva(Thread):
         handler.start()
 
     def __handle_choose_meal_event(self, choose_meal_event: ChooseMealEvent):
-        handler = ChooseMealHandler(choose_meal_event)
+        handler = ChooseMealHandler(choose_meal_event, self)
         handler.start()

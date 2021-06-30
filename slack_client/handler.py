@@ -1,19 +1,25 @@
 from threading import Thread
-from slack import RTMClient
+from slack import RTMClient, WebClient
 
 from events.events import CommandEvent, UtteranceEvent
-from iva import Iva
+from event_scheduler import EventScheduler
 
 
 class SlackClientHandler(Thread):
-    def __init__(self, slack_client_token: str, iva: Iva):
+    def __init__(self, slack_client_token: str, event_scheduler: EventScheduler):
         super().__init__()
-        self.iva = iva
+        self.event_scheduler = event_scheduler
         self.rtm_client = RTMClient(token=slack_client_token)
+        self.slack_web_client = WebClient(token=slack_client_token)
         self.rtm_client.on(event='message', callback=self.__handle_slack_message_event)
 
     def run(self):
         self.rtm_client.start()
+
+    def send_message(self, text: str):
+        self.slack_web_client.chat_postMessage(
+            channel='#iva',
+            text=text)
 
     def __handle_slack_message_event(self, **payload):
         data = payload['data']
@@ -23,6 +29,11 @@ class SlackClientHandler(Thread):
         # if the text starts with # then it should be a predefined command
         if text.startswith('#'):
             # strip the # from the command
-            self.iva.event_scheduler.schedule_event(CommandEvent(command=text[1:]))
+            command_text = text[1:]
+            command_and_args = command_text.split()
+            args = None
+            if len(command_and_args) > 1:
+                args = command_and_args[1:]
+            self.event_scheduler.schedule_event(CommandEvent(command=command_and_args[0], args=args))
         else:
-            self.iva.event_scheduler.schedule_event(UtteranceEvent(utterance=text))
+            self.event_scheduler.schedule_event(UtteranceEvent(utterance=text))

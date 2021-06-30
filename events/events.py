@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List, Optional
 from uuid import UUID, uuid4
 
 
@@ -30,6 +31,7 @@ class MindfulSessionRecordedEvent(Event):
 @dataclass
 class CommandEvent(Event):
     command: str = ""
+    args: Optional[List[str]] = None
 
 
 @dataclass
@@ -55,3 +57,8 @@ class TurnRaspberryScreenOffEvent(RaspberryEvent):
 @dataclass
 class ChooseMealEvent(Event):
     pass
+
+
+@dataclass
+class ChoiceEvent(Event):
+    choice: int = -1
