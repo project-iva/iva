@@ -2,20 +2,14 @@ from abc import ABCMeta
 from dataclasses import dataclass
 from enum import Enum
 
-from json_model import JsonModel
-
-
-class WebSocketMessageType(str, Enum):
-    REQUEST = 'request'
-    RESPONSE = 'response'
+from json_model import JsonEncodableModel
 
 
 class WebSocketMessageAction(str, Enum):
-    TEST = 'test'
-    ECHO = 'echo'
-    START_ROUTINE = 'start_routine',
-    NEXT_STEP_IN_ROUTINE = 'next_step_in_routine',
-    FINISH_ROUTINE = 'finish_routine',
+    START_PRESENTER = 'start_presenter'
+    NEXT_ITEM_IN_PRESENTER = 'next_item_in_presenter'
+    PREV_ITEM_IN_PRESENTER = 'prev_item_in_presenter'
+    PRESENTER_FINISHED = 'presenter_finished'
 
 
 class RaspberrySocketMessageAction(str, Enum):
@@ -24,33 +18,16 @@ class RaspberrySocketMessageAction(str, Enum):
 
 
 @dataclass
-class WebsocketMessage(JsonModel, metaclass=ABCMeta):
-    id: str
+class WebsocketMessage(JsonEncodableModel, metaclass=ABCMeta):
+    pass
 
 
 @dataclass
 class FrontendWebSocketMessage(WebsocketMessage):
-    type: WebSocketMessageType
     action: WebSocketMessageAction
     data: dict
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(
-            d.get('id'),
-            WebSocketMessageType(d.get('type')),
-            WebSocketMessageAction(d.get('action')),
-            d.get('data', {})
-        )
 
 
 @dataclass
 class RaspberryWebSocketMessage(WebsocketMessage):
     action: RaspberrySocketMessageAction
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(
-            d.get('id'),
-            RaspberrySocketMessageAction(d.get('action')),
-        )

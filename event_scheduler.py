@@ -4,7 +4,7 @@ from threading import Thread, RLock
 from datetime import datetime, timedelta
 from sortedcontainers import SortedList
 
-from events.events import Event, AwaitedEvent
+from events.events import Event
 from events.timed_events import TimedEvent, DailyTimedEvent
 
 
@@ -20,9 +20,6 @@ class EventScheduler(Thread):
             self.schedule_timed_event(TimedEvent(event, event_time))
         else:
             self.event_queue.put(event)
-
-    def schedule_awaited_event(self, awaited_event: AwaitedEvent):
-        self.event_queue.put(awaited_event)
 
     def schedule_timed_event(self, timed_event: TimedEvent):
         with self.lock:

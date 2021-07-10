@@ -1,26 +1,21 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import List, Optional
-from uuid import UUID, uuid4
 
 
 @dataclass
 class Event:
-    uuid: UUID = uuid4()
-
-
-@dataclass
-class AwaitedEvent:
-    event: Event
-
-
-@dataclass
-class StartMorningRoutineEvent(Event):
     pass
 
 
+class RoutineType(str, Enum):
+    MORNING = 'morning'
+    EVENING = 'evening'
+
+
 @dataclass
-class StartEveningRoutineEvent(Event):
-    pass
+class StartRoutineEvent(Event):
+    type: RoutineType
 
 
 @dataclass
@@ -30,13 +25,13 @@ class MindfulSessionRecordedEvent(Event):
 
 @dataclass
 class CommandEvent(Event):
-    command: str = ""
-    args: Optional[List[str]] = None
+    command: str
+    args: List[str]
 
 
 @dataclass
 class UtteranceEvent(Event):
-    utterance: str = ""
+    utterance: str
 
 
 @dataclass
@@ -61,4 +56,4 @@ class ChooseMealEvent(Event):
 
 @dataclass
 class ChoiceEvent(Event):
-    choice: int = -1
+    choice: int

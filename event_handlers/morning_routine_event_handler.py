@@ -1,11 +1,11 @@
 import uuid
 
-from event_handlers.routine_handler import RoutineEventHandler
+from event_handlers.start_routine_handler import StartRoutineEventHandler
 from events.events import MindfulSessionRecordedEvent
 from websocket.message import WebSocketMessageAction
 
 
-class MorningRoutineEventHandler(RoutineEventHandler):
+class MorningRoutineEventHandler(StartRoutineEventHandler):
     async def handle(self):
         await self.turn_screen_on()
 

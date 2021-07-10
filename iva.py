@@ -1,23 +1,20 @@
+import uuid
 from collections import deque
 from queue import Queue
 from threading import Thread
-from typing import Dict, Type
+from typing import Dict
 from uuid import UUID
 
+from control_session.session import PresenterControlSession
 from event_handlers.choose_meal_handler import ChooseMealHandler
 from event_handlers.command_handler import CommandHandler
-from event_handlers.evening_routine_handler import EveningRoutineEventHandler
-from event_handlers.morning_routine_event_handler import MorningRoutineEventHandler
 from event_handlers.raspberry_event_handler import RaspberryEventHandler
+from event_handlers.start_routine_handler import StartRoutineEventHandler
 from event_scheduler import EventScheduler
-from events.events import AwaitedEvent, StartMorningRoutineEvent, StartEveningRoutineEvent, Event, CommandEvent, \
+from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent, ChooseMealEvent
 from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
-
-# TODO: Queue seems like an overkill for an listener, maybe refactor to and threading.Event with extra data
-EventUuidListener = Dict[UUID, Queue]
-EventTypeListener = Dict[Type[Event], Queue]
 
 
 class Iva(Thread):
@@ -29,12 +26,10 @@ class Iva(Thread):
         self.event_scheduler = event_scheduler
         self.socket_server = socket_server
         self.slack_client = slack_client
-        self.event_uuid_listeners: EventUuidListener = {}
-        self.event_type_listeners: EventTypeListener = {}
+        self.control_sessions: Dict[UUID, PresenterControlSession] = {}
+
         self.dispatcher = {
-            AwaitedEvent: self.__handle_awaited_event,
-            StartMorningRoutineEvent: self.__handle_start_morning_routine_event,
-            StartEveningRoutineEvent: self.__handle_start_evening_routine_event,
+            StartRoutineEvent: self.__handle_start_routine_event,
             CommandEvent: self.__handle_command_event,
             UtteranceEvent: self.__handle_utterance_event,
             TurnRaspberryScreenOnEvent: self.__handle_raspberry_event,
@@ -42,22 +37,8 @@ class Iva(Thread):
             ChooseMealEvent: self.__handle_choose_meal_event
         }
 
-    def register_event_uuid_listener(self, uuid: UUID, queue: Queue):
-        self.event_uuid_listeners[uuid] = queue
-        self.awaited_event_uuids.append(uuid)
-
-    def register_event_type_listener(self, event_type: Type[Event], queue: Queue):
-        self.event_type_listeners[event_type] = queue
-
-    def unregister_event_uuid_listener(self, uuid: UUID):
-        self.event_uuid_listeners.pop(uuid, None)
-        try:
-            self.awaited_event_uuids.remove(uuid)
-        except ValueError:
-            pass
-
-    def unregister_event_type_listener(self, event_type: Type[Event]):
-        self.event_type_listeners.pop(event_type, None)
+    def register_control_session(self, control_session: PresenterControlSession):
+        self.control_sessions[uuid.uuid4()] = control_session
 
     def run(self):
         while True:
@@ -65,28 +46,8 @@ class Iva(Thread):
             self.dispatcher[type(event)](event)
             self.event_queue.task_done()
 
-    def __handle_awaited_event(self, awaited_event: AwaitedEvent):
-        # first check if there is a listener for a specific uuid
-        if listener := self.event_uuid_listeners.pop(awaited_event.event.uuid, None):
-            print('passing event to an uuid listener')
-            listener.put(awaited_event.event)
-            return
-
-        # otherwise check if there is a listener for the specific type
-        if listener := self.event_type_listeners.pop(type(awaited_event.event), None):
-            print('passing event to a type listener')
-            listener.put(awaited_event.event)
-            return
-
-        # there is awaited event but no listeners
-        print(f'There are no listeners for AwaitedEvent: {awaited_event}')
-
-    def __handle_start_morning_routine_event(self, start_morning_routine_event: StartMorningRoutineEvent):
-        handler = MorningRoutineEventHandler(start_morning_routine_event, self, self.socket_server)
-        handler.start()
-
-    def __handle_start_evening_routine_event(self, start_evening_routine_event: StartEveningRoutineEvent):
-        handler = EveningRoutineEventHandler(start_evening_routine_event, self, self.socket_server)
+    def __handle_start_routine_event(self, start_routine_event: StartRoutineEvent):
+        handler = StartRoutineEventHandler(start_routine_event, self)
         handler.start()
 
     def __handle_command_event(self, command_event: CommandEvent):

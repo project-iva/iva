@@ -1,19 +1,20 @@
-import datetime
 import os
 import threading
+import time
 from collections import deque
-from datetime import timedelta
 from queue import Queue
 
-from backend_client.client import BackendClient
+from dotenv import load_dotenv
+
+from event_handlers.start_routine_handler import StartRoutineEventHandler
 from event_scheduler import EventScheduler
-from events.events import StartMorningRoutineEvent, StartEveningRoutineEvent, CommandEvent
-from events.timed_events import DailyTimedEvent
+from events.events import StartRoutineEvent, \
+    RoutineType
+from http_server.http_server import SimpleHTTPServer
+from http_server.server import app as flask_app
+from iva import Iva
 from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
-from http_server.http_server import SimpleHTTPServer
-from iva import Iva
-from dotenv import load_dotenv
 
 
 def main():
@@ -42,6 +43,13 @@ def main():
     server = SimpleHTTPServer(awaited_event_uuids, event_queue)
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.start()
+
+    flask_app.iva = iva
+    threading.Thread(target=flask_app.run, kwargs={'debug': True, 'use_reloader': False}).start()
+
+    time.sleep(2)
+    f = StartRoutineEventHandler(StartRoutineEvent(RoutineType.MORNING), iva)
+    f.start()
 
 
 main()

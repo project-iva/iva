@@ -4,7 +4,18 @@ from dataclasses import dataclass, asdict
 
 
 @dataclass
-class JsonModel(metaclass=ABCMeta):
+class JsonEncodableModel(metaclass=ABCMeta):
+    @property
+    def json(self) -> str:
+        return json.dumps(self.dict)
+
+    @property
+    def dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class JsonDecodableModel(metaclass=ABCMeta):
     @classmethod
     @abstractmethod
     def from_dict(cls, d):
@@ -14,5 +25,7 @@ class JsonModel(metaclass=ABCMeta):
     def from_json(cls, j):
         return cls.from_dict(json.loads(j))
 
-    def to_json(self) -> str:
-        return json.dumps(asdict(self))
+
+@dataclass
+class JsonModel(JsonEncodableModel, JsonDecodableModel, metaclass=ABCMeta):
+    pass

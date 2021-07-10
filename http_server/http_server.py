@@ -6,7 +6,7 @@ from typing import Tuple, List
 
 from uuid import UUID
 
-from events.events import MindfulSessionRecordedEvent, AwaitedEvent, Event
+from events.events import MindfulSessionRecordedEvent, Event
 
 
 class PostHTTPRequestHandler(BaseHTTPRequestHandler):
