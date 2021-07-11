@@ -10,7 +10,6 @@ from event_handlers.start_routine_handler import StartRoutineEventHandler
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, \
     RoutineType
-from http_server.http_server import SimpleHTTPServer
 from http_server.server import app as flask_app
 from iva import Iva
 from slack_client.handler import SlackClientHandler
@@ -41,10 +40,6 @@ def main():
 
     flask_app.iva = iva
     threading.Thread(target=flask_app.run, kwargs={'debug': True, 'use_reloader': False}).start()
-
-    time.sleep(2)
-    f = StartRoutineEventHandler(StartRoutineEvent(RoutineType.MORNING), iva)
-    f.start()
 
 
 main()
