@@ -18,11 +18,10 @@ from websocket.server import WebSocketServer
 
 
 class Iva(Thread):
-    def __init__(self, event_queue: Queue, awaited_event_uuids: deque, event_scheduler: EventScheduler,
+    def __init__(self, event_queue: Queue, event_scheduler: EventScheduler,
                  socket_server: WebSocketServer, slack_client: SlackClientHandler):
         super().__init__()
         self.event_queue = event_queue
-        self.awaited_event_uuids = awaited_event_uuids
         self.event_scheduler = event_scheduler
         self.socket_server = socket_server
         self.slack_client = slack_client

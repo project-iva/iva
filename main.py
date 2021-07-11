@@ -22,7 +22,6 @@ def main():
     load_dotenv()
 
     event_queue = Queue()
-    awaited_event_uuids = deque()
 
     event_scheduler = EventScheduler(event_queue)
     event_scheduler.start()
@@ -34,15 +33,11 @@ def main():
     slack_client = SlackClientHandler(slack_client_token, event_scheduler)
     slack_client.start()
 
-    iva = Iva(event_queue, awaited_event_uuids, event_scheduler, frontend_socket_server, slack_client)
+    iva = Iva(event_queue, event_scheduler, frontend_socket_server, slack_client)
     iva.start()
 
     # event_scheduler.schedule_event(CommandEvent(command='start_morning_routine'))
     # event_scheduler.schedule_timed_event(DailyTimedEvent(StartMorningRoutineEvent(), datetime.datetime.now() + timedelta(seconds=5)))
-
-    server = SimpleHTTPServer(awaited_event_uuids, event_queue)
-    server_thread = threading.Thread(target=server.serve_forever)
-    server_thread.start()
 
     flask_app.iva = iva
     threading.Thread(target=flask_app.run, kwargs={'debug': True, 'use_reloader': False}).start()
