@@ -1,6 +1,4 @@
 from __future__ import annotations
-
-import asyncio
 from queue import Queue
 from threading import Thread
 from typing import List
@@ -8,6 +6,7 @@ from typing import List
 from control_session.session import PresenterSession, PresenterItem, PresenterSessionType, PresenterControlSession, \
     ControllerAction
 from events.events import StartRoutineEvent, RoutineType
+from models.routine import RoutineStep
 from websocket.message import WebSocketMessageAction, FrontendWebSocketMessage, \
     RaspberryWebSocketMessage, RaspberrySocketMessageAction
 from websocket.server import WebSocketClientType
@@ -59,17 +58,33 @@ class StartRoutineEventHandler(Thread):
         return PresenterSession(PresenterSessionType.ROUTINE, items)
 
     def get_morning_routine_items(self) -> List[PresenterItem]:
-        items = []
-        valid_actions = [ControllerAction.NEXT]
-        for i in range(5):
-            data = {'title': f'Title {i}', 'description': f'Description {i}'}
-            item = PresenterItem(data, valid_actions)
-            items.append(item)
+        routine_steps = [
+            RoutineStep('Water', 'Drink a glass of water', ['fas', 'glass-whiskey'], 'LightSkyBlue'),
+            RoutineStep('Mindfulness', 'Meditation', ['fas', 'brain'], 'SlateGrey'),
+            RoutineStep('TODOs', 'Prepare a list of TODOs for the day', ['fas', 'list'], 'DarkGray'),
+            RoutineStep('Journal', 'Write/sketch for a few minutes', ['fas', 'journal-whills'], 'Maroon'),
+        ]
 
-        data = {'title': f'Last title', 'description': f'Last'}
-        item = PresenterItem(data, [ControllerAction.CONFIRM])
-        items.append(item)
-        return items
+        return self.get_presenter_items(routine_steps)
 
     def get_evening_routine_items(self) -> List[PresenterItem]:
-        pass
+        routine_steps = [
+            RoutineStep('Reading', 'Read a book for a few minutes', ['fas', 'book'], 'Sienna'),
+            RoutineStep('Journal', 'Write/sketch for a few minutes', ['fas', 'journal-whills'], 'Maroon'),
+            RoutineStep('Mindfulness', 'Meditation', ['fas', 'brain'], 'SlateGrey'),
+        ]
+
+        return self.get_presenter_items(routine_steps)
+
+    def get_presenter_items(self, routine_steps: List[RoutineStep]) -> List[PresenterItem]:
+        presenter_items = []
+        last_step_index = len(routine_steps) - 1
+
+        for index, step in enumerate(routine_steps):
+            if index == last_step_index:
+                item = PresenterItem(step.dict, [ControllerAction.CONFIRM])
+            else:
+                item = PresenterItem(step.dict, [ControllerAction.NEXT])
+            presenter_items.append(item)
+
+        return presenter_items

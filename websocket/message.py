@@ -2,7 +2,7 @@ from abc import ABCMeta
 from dataclasses import dataclass
 from enum import Enum
 
-from json_model import JsonEncodableModel
+from models.json_model import JsonEncodableModel
 
 
 class WebSocketMessageAction(str, Enum):

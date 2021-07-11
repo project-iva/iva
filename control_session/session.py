@@ -1,11 +1,10 @@
 import asyncio
 from dataclasses import dataclass
-from dataclasses import dataclass
 from enum import Enum
 from queue import Queue
 from typing import List
 
-from json_model import JsonEncodableModel
+from models.json_model import JsonEncodableModel
 from websocket.message import FrontendWebSocketMessage, WebSocketMessageAction
 from websocket.server import WebSocketClientType, WebSocketServer
 
@@ -35,7 +34,7 @@ class PresenterSessionType(str, Enum):
 @dataclass
 class PresenterSession(JsonEncodableModel):
     session_type: PresenterSessionType
-    steps: List[PresenterItem]
+    items: List[PresenterItem]
 
 
 class PresenterControlSession:
@@ -54,7 +53,7 @@ class PresenterControlSession:
             ControllerAction.START_PRESENTING: self.start_presenting,
         }
 
-        presenter_step = self.presenter_session.steps[self.current_item]
+        presenter_step = self.presenter_session.items[self.current_item]
         if action == ControllerAction.START_PRESENTING or action in presenter_step.valid_actions:
             dispatcher[action]()
         else:
@@ -67,18 +66,18 @@ class PresenterControlSession:
 
     def perform_next_action(self):
         self.current_item += 1
-        data = {'session_type': PresenterSessionType.MEAL_CHOICES}
+        data = {'session_type': self.presenter_session.session_type}
         message = FrontendWebSocketMessage(action=WebSocketMessageAction.NEXT_ITEM_IN_PRESENTER, data=data)
         self.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
 
     def perform_prev_action(self):
         self.current_item -= 1
-        data = {'session_type': PresenterSessionType.MEAL_CHOICES}
+        data = {'session_type': self.presenter_session.session_type}
         message = FrontendWebSocketMessage(action=WebSocketMessageAction.PREV_ITEM_IN_PRESENTER, data=data)
         self.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
 
     def perform_confirm_action(self):
-        data = {'session_type': PresenterSessionType.MEAL_CHOICES}
+        data = {'session_type': self.presenter_session.session_type}
         message = FrontendWebSocketMessage(action=WebSocketMessageAction.PRESENTER_FINISHED, data=data)
         self.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
         self.queue.put(self.current_item)

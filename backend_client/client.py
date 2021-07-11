@@ -3,7 +3,7 @@ from typing import List
 
 import requests as requests
 
-from backend_client.models import Meal, ChosenMeal
+from models.meal import Meal, ChosenMeal
 
 
 class BackendClient:
