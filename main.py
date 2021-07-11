@@ -1,15 +1,8 @@
 import os
 import threading
-import time
-from collections import deque
 from queue import Queue
-
 from dotenv import load_dotenv
-
-from event_handlers.start_routine_handler import StartRoutineEventHandler
 from event_scheduler import EventScheduler
-from events.events import StartRoutineEvent, \
-    RoutineType
 from http_server.server import app as flask_app
 from iva import Iva
 from slack_client.handler import SlackClientHandler

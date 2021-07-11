@@ -4,6 +4,7 @@ from queue import Queue
 from threading import Thread
 from typing import List
 
+from backend_client.client import BackendClient
 from models.meal import Meal
 from control_session.session import PresenterControlSession, PresenterItem, ControllerAction, PresenterSession, \
     PresenterSessionType
@@ -20,23 +21,24 @@ class ChooseMealHandler(Thread):
     def run(self):
         print(f'Handling {self.choose_meal_event}')
 
-        presenter_session = self.get_presenter_session()
+        possible_meals = BackendClient.get_possible_meals()
+        presenter_session = self.get_presenter_session(possible_meals)
         control_session = PresenterControlSession(presenter_session, self.event_queue, self.iva.socket_server)
         self.iva.register_control_session(control_session)
         control_session.handle_action(ControllerAction.START_PRESENTING)
 
         choice = self.event_queue.get()
         self.event_queue.task_done()
-        print(choice)
-        # BackendClient.post_chosen_meal(chosen_meal_id)
 
-    def get_presenter_session(self) -> PresenterSession:
-        items = self.get_meal_items()
+        # store the choice in the backend
+        chosen_meal_id = possible_meals[choice].id
+        BackendClient.post_chosen_meal(chosen_meal_id)
+
+    def get_presenter_session(self, possible_meals: List[Meal]) -> PresenterSession:
+        items = self.get_meal_items(possible_meals)
         return PresenterSession(PresenterSessionType.MEAL_CHOICES, items)
 
-    def get_meal_items(self) -> List[PresenterItem]:
-        # possible_meals = BackendClient.get_possible_meals()
-        possible_meals = [Meal(1, 'meal 1', 'b', 1, []), Meal(2, 'meal 2', 'b', 1, [])]
+    def get_meal_items(self, possible_meals: List[Meal]) -> List[PresenterItem]:
         presenter_items = []
         last_meal_index = len(possible_meals) - 1
         for index, meal in enumerate(possible_meals):

@@ -25,5 +25,5 @@ class BackendClient:
         chosen_meal = ChosenMeal(meal_id)
         base_api_url = BackendClient.get_backend_api_url()
         headers = {'Content-type': 'application/json'}
-        response = requests.post(f'{base_api_url}/meal-tracking-entries/', headers=headers, data=chosen_meal.to_json())
+        response = requests.post(f'{base_api_url}/meal-tracking-entries/', headers=headers, data=chosen_meal.json)
         response.raise_for_status()

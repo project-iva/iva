@@ -31,9 +31,7 @@ class SlackClientHandler(Thread):
             # strip the # from the command
             command_text = text[1:]
             command_and_args = command_text.split()
-            args = None
-            if len(command_and_args) > 1:
-                args = command_and_args[1:]
+            args = command_and_args[1:]
             self.event_scheduler.schedule_event(CommandEvent(command=command_and_args[0], args=args))
         else:
             self.event_scheduler.schedule_event(UtteranceEvent(utterance=text))
