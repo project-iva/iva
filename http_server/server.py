@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Response
 from flask_restful import Resource, Api, reqparse, abort
 from uuid import UUID
 
@@ -25,7 +25,7 @@ class ControlSessionResource(Resource):
         action = args['action']
         try:
             control_session.handle_action(action)
-            return '', 200
+            return Response(status=204)
         except InvalidControlActionException:
             abort(422, message='Invalid control action')
 
@@ -39,8 +39,15 @@ class ControlSessionResource(Resource):
 
 class ControlSessionListResource(Resource):
     def get(self):
-        return [str(session_uuid) for session_uuid in app.iva.control_sessions.keys()]
+        sessions = []
+        for session_uuid in app.iva.control_sessions:
+            session = app.iva.control_sessions[session_uuid]
+            sessions.append({
+                'uuid': str(session_uuid),
+                'type': session.presenter_session.session_type
+            })
+        return sessions
 
 
-api.add_resource(ControlSessionListResource, '/control-sessions')
-api.add_resource(ControlSessionResource, '/control-sessions/<uuid:session_uuid>')
+api.add_resource(ControlSessionListResource, '/control-sessions/')
+api.add_resource(ControlSessionResource, '/control-sessions/<uuid:session_uuid>/')
