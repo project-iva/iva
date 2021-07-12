@@ -1,5 +1,4 @@
 import uuid
-from collections import deque
 from queue import Queue
 from threading import Thread
 from typing import Dict
@@ -36,8 +35,16 @@ class Iva(Thread):
             ChooseMealEvent: self.__handle_choose_meal_event
         }
 
-    def register_control_session(self, control_session: PresenterControlSession):
-        self.control_sessions[uuid.uuid4()] = control_session
+    def register_control_session(self, control_session: PresenterControlSession) -> uuid:
+        session_uuid = uuid.uuid4()
+        self.control_sessions[session_uuid] = control_session
+        return session_uuid
+
+    def unregister_control_session(self, session_uuid: uuid):
+        try:
+            self.control_sessions.pop(session_uuid)
+        except KeyError:
+            pass
 
     def run(self):
         while True:

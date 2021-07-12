@@ -24,11 +24,12 @@ class ChooseMealHandler(Thread):
         possible_meals = BackendClient.get_possible_meals()
         presenter_session = self.get_presenter_session(possible_meals)
         control_session = PresenterControlSession(presenter_session, self.event_queue, self.iva.socket_server)
-        self.iva.register_control_session(control_session)
+        session_uuid = self.iva.register_control_session(control_session)
         control_session.handle_action(ControllerAction.START_PRESENTING)
 
         choice = self.event_queue.get()
         self.event_queue.task_done()
+        self.iva.unregister_control_session(session_uuid)
 
         # store the choice in the backend
         chosen_meal_id = possible_meals[choice].id

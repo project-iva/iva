@@ -26,12 +26,13 @@ class StartRoutineEventHandler(Thread):
         self.turn_screen_on()
 
         control_session = PresenterControlSession(presenter_session, self.event_queue, self.iva.socket_server)
-        self.iva.register_control_session(control_session)
+        session_uuid = self.iva.register_control_session(control_session)
         control_session.handle_action(ControllerAction.START_PRESENTING)
 
         # wait for the control session to finish
         self.event_queue.get()
         self.event_queue.task_done()
+        self.iva.unregister_control_session(session_uuid)
 
         self.turn_screen_off()
 
