@@ -9,11 +9,11 @@ from websocket.message import FrontendWebSocketMessage, WebSocketMessageAction
 from websocket.server import WebSocketClientType, WebSocketServer
 
 
-class InvalidControlActionException(Exception):
+class InvalidControlSessionActionException(Exception):
     pass
 
 
-class ControllerAction(str, Enum):
+class ControlSessionAction(str, Enum):
     START_PRESENTING = 'start_presenting'
     NEXT = 'next'
     PREV = 'prev'
@@ -23,7 +23,7 @@ class ControllerAction(str, Enum):
 @dataclass
 class PresenterItem:
     data: dict
-    valid_actions: List[ControllerAction]
+    valid_actions: List[ControlSessionAction]
 
 
 class PresenterSessionType(str, Enum):
@@ -45,19 +45,19 @@ class PresenterControlSession:
         self.socket_server = socket_server
         self.event_loop = asyncio.new_event_loop()
 
-    def handle_action(self, action: ControllerAction):
+    def handle_action(self, action: ControlSessionAction):
         dispatcher = {
-            ControllerAction.NEXT: self.perform_next_action,
-            ControllerAction.PREV: self.perform_prev_action,
-            ControllerAction.CONFIRM: self.perform_confirm_action,
-            ControllerAction.START_PRESENTING: self.start_presenting,
+            ControlSessionAction.NEXT: self.perform_next_action,
+            ControlSessionAction.PREV: self.perform_prev_action,
+            ControlSessionAction.CONFIRM: self.perform_confirm_action,
+            ControlSessionAction.START_PRESENTING: self.start_presenting,
         }
 
         presenter_step = self.presenter_session.items[self.current_item]
-        if action == ControllerAction.START_PRESENTING or action in presenter_step.valid_actions:
+        if action == ControlSessionAction.START_PRESENTING or action in presenter_step.valid_actions:
             dispatcher[action]()
         else:
-            raise InvalidControlActionException
+            raise InvalidControlSessionActionException
 
     def start_presenting(self):
         data = self.presenter_session.dict

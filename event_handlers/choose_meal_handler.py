@@ -6,7 +6,7 @@ from typing import List
 
 from backend_client.client import BackendClient
 from models.meal import Meal
-from control_session.session import PresenterControlSession, PresenterItem, ControllerAction, PresenterSession, \
+from control_session.session import PresenterControlSession, PresenterItem, ControlSessionAction, PresenterSession, \
     PresenterSessionType
 from events.events import ChooseMealEvent
 
@@ -25,7 +25,7 @@ class ChooseMealHandler(Thread):
         presenter_session = self.get_presenter_session(possible_meals)
         control_session = PresenterControlSession(presenter_session, self.event_queue, self.iva.socket_server)
         session_uuid = self.iva.register_control_session(control_session)
-        control_session.handle_action(ControllerAction.START_PRESENTING)
+        control_session.handle_action(ControlSessionAction.START_PRESENTING)
 
         choice = self.event_queue.get()
         self.event_queue.task_done()
@@ -43,13 +43,13 @@ class ChooseMealHandler(Thread):
         presenter_items = []
         last_meal_index = len(possible_meals) - 1
         for index, meal in enumerate(possible_meals):
-            valid_actions = [ControllerAction.CONFIRM]
+            valid_actions = [ControlSessionAction.CONFIRM]
             if index == 0:
-                item = PresenterItem(meal.dict, valid_actions + [ControllerAction.NEXT])
+                item = PresenterItem(meal.dict, valid_actions + [ControlSessionAction.NEXT])
             elif index == last_meal_index:
-                item = PresenterItem(meal.dict, valid_actions + [ControllerAction.PREV])
+                item = PresenterItem(meal.dict, valid_actions + [ControlSessionAction.PREV])
             else:
-                item = PresenterItem(meal.dict, valid_actions + [ControllerAction.NEXT, ControllerAction.PREV])
+                item = PresenterItem(meal.dict, valid_actions + [ControlSessionAction.NEXT, ControlSessionAction.PREV])
             presenter_items.append(item)
 
         return presenter_items

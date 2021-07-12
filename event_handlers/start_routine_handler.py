@@ -4,7 +4,7 @@ from threading import Thread
 from typing import List
 
 from control_session.session import PresenterSession, PresenterItem, PresenterSessionType, PresenterControlSession, \
-    ControllerAction
+    ControlSessionAction
 from events.events import StartRoutineEvent, RoutineType
 from models.routine import RoutineStep
 from websocket.message import WebSocketMessageAction, FrontendWebSocketMessage, \
@@ -27,7 +27,7 @@ class StartRoutineEventHandler(Thread):
 
         control_session = PresenterControlSession(presenter_session, self.event_queue, self.iva.socket_server)
         session_uuid = self.iva.register_control_session(control_session)
-        control_session.handle_action(ControllerAction.START_PRESENTING)
+        control_session.handle_action(ControlSessionAction.START_PRESENTING)
 
         # wait for the control session to finish
         self.event_queue.get()
@@ -83,9 +83,9 @@ class StartRoutineEventHandler(Thread):
 
         for index, step in enumerate(routine_steps):
             if index == last_step_index:
-                item = PresenterItem(step.dict, [ControllerAction.CONFIRM])
+                item = PresenterItem(step.dict, [ControlSessionAction.CONFIRM])
             else:
-                item = PresenterItem(step.dict, [ControllerAction.NEXT])
+                item = PresenterItem(step.dict, [ControlSessionAction.NEXT])
             presenter_items.append(item)
 
         return presenter_items

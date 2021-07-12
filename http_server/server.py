@@ -2,13 +2,13 @@ from flask import Flask, Response
 from flask_restful import Resource, Api, reqparse, abort
 from uuid import UUID
 
-from control_session.session import PresenterControlSession, ControllerAction, InvalidControlActionException
+from control_session.session import PresenterControlSession, ControlSessionAction, InvalidControlSessionActionException
 
 app = Flask(__name__)
 api = Api(app)
 
 control_session_action_parser = reqparse.RequestParser()
-control_session_action_parser.add_argument('action', required=True, type=ControllerAction, choices=list(ControllerAction))
+control_session_action_parser.add_argument('action', required=True, type=ControlSessionAction, choices=list(ControlSessionAction))
 
 
 def get_control_session_or_abort(control_session_uuid: UUID) -> PresenterControlSession:
@@ -26,7 +26,7 @@ class ControlSessionResource(Resource):
         try:
             control_session.handle_action(action)
             return Response(status=204)
-        except InvalidControlActionException:
+        except InvalidControlSessionActionException:
             abort(422, message='Invalid control action')
 
     def get(self, session_uuid: UUID):
