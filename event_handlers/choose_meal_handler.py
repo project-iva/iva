@@ -1,9 +1,14 @@
 from __future__ import annotations
+
 from queue import Queue
 from threading import Thread
+from typing import List
 
 from backend_client.client import BackendClient
-from events.events import ChooseMealEvent, ChoiceEvent
+from models.meal import Meal
+from control_session.session import PresenterControlSession, PresenterItem, ControlSessionAction, PresenterSession, \
+    PresenterSessionType
+from events.events import ChooseMealEvent
 
 
 class ChooseMealHandler(Thread):
@@ -15,30 +20,36 @@ class ChooseMealHandler(Thread):
 
     def run(self):
         print(f'Handling {self.choose_meal_event}')
+
         possible_meals = BackendClient.get_possible_meals()
-        choice_to_meal_map = {
-            choice: meal for choice, meal in enumerate(possible_meals, start=1)
-        }
+        presenter_session = self.get_presenter_session(possible_meals)
+        control_session = PresenterControlSession(presenter_session, self.event_queue, self.iva.socket_server)
+        session_uuid = self.iva.register_control_session(control_session)
+        control_session.handle_action(ControlSessionAction.START_PRESENTING)
 
-        self.iva.register_event_type_listener(ChoiceEvent, self.event_queue)
-
-        cancel_choice = len(possible_meals) + 1
-        slack_message = 'Choose meal:\n'
-        for choice in choice_to_meal_map:
-            meal = choice_to_meal_map[choice]
-            slack_message += f'\t{choice}) {meal.name} - {meal.kcal} kcal\n'
-        slack_message += f'\t{cancel_choice}) Cancel'
-        self.iva.slack_client.send_message(slack_message)
-
-        choice_event = self.event_queue.get()
+        choice = self.event_queue.get()
         self.event_queue.task_done()
-        choice = choice_event.choice
+        self.iva.unregister_control_session(session_uuid)
 
-        if choice == cancel_choice:
-            return
-
-        if choice not in choice_to_meal_map:
-            raise Exception('Invalid choice')
-
-        chosen_meal_id = choice_to_meal_map[choice].id
+        # store the choice in the backend
+        chosen_meal_id = possible_meals[choice].id
         BackendClient.post_chosen_meal(chosen_meal_id)
+
+    def get_presenter_session(self, possible_meals: List[Meal]) -> PresenterSession:
+        items = self.get_meal_items(possible_meals)
+        return PresenterSession(PresenterSessionType.MEAL_CHOICES, items)
+
+    def get_meal_items(self, possible_meals: List[Meal]) -> List[PresenterItem]:
+        presenter_items = []
+        last_meal_index = len(possible_meals) - 1
+        for index, meal in enumerate(possible_meals):
+            valid_actions = [ControlSessionAction.CONFIRM]
+            if index == 0:
+                item = PresenterItem(meal.dict, valid_actions + [ControlSessionAction.NEXT])
+            elif index == last_meal_index:
+                item = PresenterItem(meal.dict, valid_actions + [ControlSessionAction.PREV])
+            else:
+                item = PresenterItem(meal.dict, valid_actions + [ControlSessionAction.NEXT, ControlSessionAction.PREV])
+            presenter_items.append(item)
+
+        return presenter_items

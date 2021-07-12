@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from json_model import JsonModel
+from models.json_model import JsonModel
 
 
 @dataclass
@@ -29,7 +29,7 @@ class Meal(JsonModel):
 
     @classmethod
     def from_dict(cls, d):
-        ingredients = d.get('ingredients')
+        ingredients = d.get('ingredients', [])
         return cls(
             d.get('id'),
             d.get('name'),

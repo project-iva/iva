@@ -6,13 +6,12 @@ from typing import List, Dict, Optional
 import websockets
 from websockets import WebSocketServerProtocol
 
-from websocket.message import FrontendWebSocketMessage, WebsocketMessage
 from websocket.handler import WebSocketConnectionHandler
+from websocket.message import WebsocketMessage
 
 
 class WebSocketClientType(str, Enum):
     WEB_INTERFACE = 'web'
-    APP = 'ios'
     RASPBERRY = 'raspberry'
 
 
@@ -43,19 +42,21 @@ class WebSocketServer(Thread):
         connection_type = WebSocketClientType(path[1:])
         print(f'new connection; type: {connection_type}')
         self.__connected_clients[connection_type].append(websocket_connection_handler)
-        async for message in websocket:
-            websocket_message = FrontendWebSocketMessage.from_json(message)
-            await websocket_connection_handler.handle_message(websocket_message)
+        async for _ in websocket:
+            pass
 
         # iteration terminates when the client disconnects
         self.__connected_clients[connection_type].remove(websocket_connection_handler)
 
-    async def send_message(self, message: WebsocketMessage, client_types: Optional[List[WebSocketClientType]] = None):
+    def send_message(self, message: WebsocketMessage, client_types: Optional[List[WebSocketClientType]] = None):
         if client_types is None:
-            client_types = [WebSocketClientType.WEB_INTERFACE, WebSocketClientType.APP]
+            client_types = list(WebSocketClientType)
 
         coroutines = []
         for client_type in client_types:
             for handler in self.__connected_clients[client_type]:
                 coroutines.append(handler.send_message(message))
-        await asyncio.gather(*coroutines)
+
+        event_loop = asyncio.new_event_loop()
+        feature = asyncio.gather(*coroutines, loop=event_loop)
+        event_loop.run_until_complete(feature)
