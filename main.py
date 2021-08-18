@@ -3,6 +3,7 @@ import threading
 from queue import Queue
 from dotenv import load_dotenv
 from event_scheduler import EventScheduler
+from events.events import ScheduleDayPlanEvent
 from http_server.server import app as flask_app
 from iva import Iva
 from slack_client.handler import SlackClientHandler
@@ -28,7 +29,7 @@ def main():
     iva = Iva(event_queue, event_scheduler, frontend_socket_server, slack_client)
     iva.start()
 
-    # event_scheduler.schedule_event(CommandEvent(command='start_morning_routine'))
+    event_scheduler.schedule_event(ScheduleDayPlanEvent())
     # event_scheduler.schedule_timed_event(DailyTimedEvent(StartMorningRoutineEvent(), datetime.datetime.now() + timedelta(seconds=5)))
 
     flask_app.iva = iva
