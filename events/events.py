@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import List
+
+from models.day_plan import DayPlanActivity
 
 
 @dataclass
@@ -57,3 +61,16 @@ class ChooseMealEvent(Event):
 @dataclass
 class ChoiceEvent(Event):
     choice: int
+
+
+@dataclass
+class ScheduleDayPlanEvent(Event):
+    pass
+
+
+@dataclass
+class DayPlanActivityEvent(Event):
+    activity: DayPlanActivity
+
+    def __lt__(self, other: DayPlanActivityEvent):
+        return self.activity.start_time < other.activity.start_time

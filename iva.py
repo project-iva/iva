@@ -8,10 +8,12 @@ from control_session.session import PresenterControlSession
 from event_handlers.choose_meal_handler import ChooseMealHandler
 from event_handlers.command_handler import CommandHandler
 from event_handlers.raspberry_event_handler import RaspberryEventHandler
+from event_handlers.schedule_day_plan_handler import ScheduleDayPlanHandler
 from event_handlers.start_routine_handler import StartRoutineEventHandler
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
-    UtteranceEvent, RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent, ChooseMealEvent
+    UtteranceEvent, RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent, ChooseMealEvent, \
+    ScheduleDayPlanEvent
 from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
 
@@ -32,7 +34,8 @@ class Iva(Thread):
             UtteranceEvent: self.__handle_utterance_event,
             TurnRaspberryScreenOnEvent: self.__handle_raspberry_event,
             TurnRaspberryScreenOffEvent: self.__handle_raspberry_event,
-            ChooseMealEvent: self.__handle_choose_meal_event
+            ChooseMealEvent: self.__handle_choose_meal_event,
+            ScheduleDayPlanEvent: self.__handle_schedule_day_plan_event
         }
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
@@ -69,4 +72,8 @@ class Iva(Thread):
 
     def __handle_choose_meal_event(self, choose_meal_event: ChooseMealEvent):
         handler = ChooseMealHandler(choose_meal_event, self)
+        handler.start()
+
+    def __handle_schedule_day_plan_event(self, schedule_day_plan_event: ScheduleDayPlanEvent):
+        handler = ScheduleDayPlanHandler(schedule_day_plan_event, self.event_scheduler)
         handler.start()
