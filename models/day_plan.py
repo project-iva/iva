@@ -8,6 +8,7 @@ from models.json_model import JsonModel
 class DayPlanActivityType(str, Enum):
     MORNING_ROUTINE = 'MORNING_ROUTINE'
     EVENING_ROUTINE = 'EVENING_ROUTINE'
+    MEAL = 'MEAL'
     LEISURE = 'LEISURE'
     WORKOUT = 'WORKOUT'
     JOB = 'JOB'
