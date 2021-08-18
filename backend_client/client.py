@@ -3,6 +3,7 @@ from typing import List
 
 import requests as requests
 
+from models.day_plan import DayPlan
 from models.meal import Meal, ChosenMeal
 
 
@@ -27,3 +28,10 @@ class BackendClient:
         headers = {'Content-type': 'application/json'}
         response = requests.post(f'{base_api_url}/meal-tracking-entries/', headers=headers, data=chosen_meal.json)
         response.raise_for_status()
+
+    @staticmethod
+    def get_current_day_plan() -> DayPlan:
+        base_api_url = BackendClient.get_backend_api_url()
+        response = requests.get(f'{base_api_url}/current-day-plan/')
+        day_plan = DayPlan.from_dict(response.json())
+        return day_plan
