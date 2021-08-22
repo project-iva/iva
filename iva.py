@@ -51,6 +51,9 @@ class Iva(Thread):
         except KeyError:
             pass
 
+    def refresh_day_plan(self):
+        self.__handle_schedule_day_plan_event(ScheduleDayPlanEvent())
+
     def run(self):
         while True:
             event = self.event_queue.get()

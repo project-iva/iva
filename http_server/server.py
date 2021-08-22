@@ -49,5 +49,12 @@ class ControlSessionListResource(Resource):
         return sessions
 
 
+class DayPlanChangedResource(Resource):
+    def post(self):
+        app.iva.refresh_day_plan()
+        return Response(status=204)
+
+
 api.add_resource(ControlSessionListResource, '/control-sessions/')
 api.add_resource(ControlSessionResource, '/control-sessions/<uuid:session_uuid>/')
+api.add_resource(DayPlanChangedResource, '/day-plan-changed/')
