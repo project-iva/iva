@@ -44,7 +44,9 @@ class ChooseMealHandler(Thread):
         last_meal_index = len(possible_meals) - 1
         for index, meal in enumerate(possible_meals):
             valid_actions = [ControlSessionAction.CONFIRM]
-            if index == 0:
+            if index == 0 and index == last_meal_index:
+                item = PresenterItem(meal.dict, valid_actions)
+            elif index == 0:
                 item = PresenterItem(meal.dict, valid_actions + [ControlSessionAction.NEXT])
             elif index == last_meal_index:
                 item = PresenterItem(meal.dict, valid_actions + [ControlSessionAction.PREV])
