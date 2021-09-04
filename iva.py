@@ -13,7 +13,7 @@ from event_handlers.schedule_day_plan_handler import ScheduleDayPlanHandler
 from event_handlers.start_routine_handler import StartRoutineEventHandler
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
-    UtteranceEvent, RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent, ChooseMealEvent, \
+    UtteranceEvent, RaspberryEvent, ChooseMealEvent, \
     ScheduleDayPlanEvent, DayPlanActivityEvent
 from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
@@ -33,8 +33,7 @@ class Iva(Thread):
             StartRoutineEvent: self.__handle_start_routine_event,
             CommandEvent: self.__handle_command_event,
             UtteranceEvent: self.__handle_utterance_event,
-            TurnRaspberryScreenOnEvent: self.__handle_raspberry_event,
-            TurnRaspberryScreenOffEvent: self.__handle_raspberry_event,
+            RaspberryEvent: self.__handle_raspberry_event,
             ChooseMealEvent: self.__handle_choose_meal_event,
             ScheduleDayPlanEvent: self.__handle_schedule_day_plan_event,
             DayPlanActivityEvent: self.__handle_day_plan_activity_event,
@@ -72,7 +71,7 @@ class Iva(Thread):
         pass
 
     def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
-        handler = RaspberryEventHandler(raspberry_event, self.socket_server)
+        handler = RaspberryEventHandler(raspberry_event)
         handler.start()
 
     def __handle_choose_meal_event(self, choose_meal_event: ChooseMealEvent):

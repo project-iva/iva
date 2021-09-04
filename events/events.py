@@ -5,6 +5,7 @@ from enum import Enum
 from typing import List
 
 from models.day_plan import DayPlanActivity
+from raspberry_client.client import RaspberryClient
 
 
 @dataclass
@@ -40,17 +41,7 @@ class UtteranceEvent(Event):
 
 @dataclass
 class RaspberryEvent(Event):
-    pass
-
-
-@dataclass
-class TurnRaspberryScreenOnEvent(RaspberryEvent):
-    pass
-
-
-@dataclass
-class TurnRaspberryScreenOffEvent(RaspberryEvent):
-    pass
+    action: RaspberryClient.Action
 
 
 @dataclass

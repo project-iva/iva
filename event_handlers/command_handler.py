@@ -1,8 +1,8 @@
 from threading import Thread
 
 from event_scheduler import EventScheduler
-from events.events import CommandEvent, TurnRaspberryScreenOnEvent, \
-    TurnRaspberryScreenOffEvent, ChooseMealEvent, StartRoutineEvent, RoutineType
+from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, RoutineType, RaspberryEvent
+from raspberry_client.client import RaspberryClient
 
 
 class CommandHandler(Thread):
@@ -30,10 +30,10 @@ class CommandHandler(Thread):
         self.event_scheduler.schedule_event(StartRoutineEvent(routine_type))
 
     def __handle_turn_screen_on_command(self):
-        self.event_scheduler.schedule_event(TurnRaspberryScreenOnEvent())
+        self.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_ON))
 
     def __handle_turn_screen_off_command(self):
-        self.event_scheduler.schedule_event(TurnRaspberryScreenOffEvent())
+        self.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_OFF))
 
     def __handle_choose_meal_command(self):
         self.event_scheduler.schedule_event(ChooseMealEvent())

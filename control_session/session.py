@@ -5,7 +5,7 @@ from queue import Queue
 from typing import List
 
 from models.json_model import JsonEncodableModel
-from websocket.message import FrontendWebSocketMessage, WebSocketMessageAction
+from websocket.message import FrontendWebSocketMessage, FrontendWebSocketMessageAction
 from websocket.server import WebSocketClientType, WebSocketServer
 
 
@@ -61,23 +61,23 @@ class PresenterControlSession:
 
     def start_presenting(self):
         data = self.presenter_session.dict
-        message = FrontendWebSocketMessage(action=WebSocketMessageAction.START_PRESENTER, data=data)
+        message = FrontendWebSocketMessage(action=FrontendWebSocketMessageAction.START_PRESENTER, data=data)
         self.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
 
     def perform_next_action(self):
         self.current_item += 1
         data = {'session_type': self.presenter_session.session_type}
-        message = FrontendWebSocketMessage(action=WebSocketMessageAction.NEXT_ITEM_IN_PRESENTER, data=data)
+        message = FrontendWebSocketMessage(action=FrontendWebSocketMessageAction.NEXT_ITEM_IN_PRESENTER, data=data)
         self.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
 
     def perform_prev_action(self):
         self.current_item -= 1
         data = {'session_type': self.presenter_session.session_type}
-        message = FrontendWebSocketMessage(action=WebSocketMessageAction.PREV_ITEM_IN_PRESENTER, data=data)
+        message = FrontendWebSocketMessage(action=FrontendWebSocketMessageAction.PREV_ITEM_IN_PRESENTER, data=data)
         self.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
 
     def perform_confirm_action(self):
         data = {'session_type': self.presenter_session.session_type}
-        message = FrontendWebSocketMessage(action=WebSocketMessageAction.PRESENTER_FINISHED, data=data)
+        message = FrontendWebSocketMessage(action=FrontendWebSocketMessageAction.PRESENTER_FINISHED, data=data)
         self.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
         self.queue.put(self.current_item)

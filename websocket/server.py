@@ -7,12 +7,11 @@ import websockets
 from websockets import WebSocketServerProtocol
 
 from websocket.handler import WebSocketConnectionHandler
-from websocket.message import WebsocketMessage
+from websocket.message import FrontendWebSocketMessage
 
 
 class WebSocketClientType(str, Enum):
     WEB_INTERFACE = 'web'
-    RASPBERRY = 'raspberry'
 
 
 # TODO: switch to autobahn package to avoid dealing with asyncio
@@ -48,7 +47,7 @@ class WebSocketServer(Thread):
         # iteration terminates when the client disconnects
         self.__connected_clients[connection_type].remove(websocket_connection_handler)
 
-    def send_message(self, message: WebsocketMessage, client_types: Optional[List[WebSocketClientType]] = None):
+    def send_message(self, message: FrontendWebSocketMessage, client_types: Optional[List[WebSocketClientType]] = None):
         if client_types is None:
             client_types = list(WebSocketClientType)
 

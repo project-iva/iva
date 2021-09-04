@@ -1,27 +1,13 @@
-import asyncio
 from threading import Thread
-from events.events import RaspberryEvent, TurnRaspberryScreenOnEvent, TurnRaspberryScreenOffEvent
-from websocket.message import RaspberrySocketMessageAction, RaspberryWebSocketMessage
-from websocket.server import WebSocketServer, WebSocketClientType
+from events.events import RaspberryEvent
+from raspberry_client.client import RaspberryClient
 
 
 class RaspberryEventHandler(Thread):
-    def __init__(self, raspberry_event: RaspberryEvent, websocket_server: WebSocketServer):
+    def __init__(self, raspberry_event: RaspberryEvent):
         super().__init__()
         self.raspberry_event = raspberry_event
-        self.websocket_server = websocket_server
-        self.action_mapping = {
-            TurnRaspberryScreenOnEvent: RaspberrySocketMessageAction.SCREEN_ON,
-            TurnRaspberryScreenOffEvent: RaspberrySocketMessageAction.SCREEN_OFF,
-        }
 
     def run(self):
         print(f'Handling {self.raspberry_event}')
-        event_loop = asyncio.new_event_loop()
-        event_loop.run_until_complete(self.handle())
-
-    async def handle(self):
-        action = self.action_mapping[type(self.raspberry_event)]
-
-        message = RaspberryWebSocketMessage(action=action)
-        await self.websocket_server.send_message(message, [WebSocketClientType.RASPBERRY])
+        RaspberryClient.send_action_request(self.raspberry_event.action)

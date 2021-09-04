@@ -5,10 +5,10 @@ from typing import List
 
 from control_session.session import PresenterSession, PresenterItem, PresenterSessionType, PresenterControlSession, \
     ControlSessionAction
-from events.events import StartRoutineEvent, RoutineType
+from events.events import StartRoutineEvent, RoutineType, RaspberryEvent
 from models.routine import RoutineStep
-from websocket.message import WebSocketMessageAction, FrontendWebSocketMessage, \
-    RaspberryWebSocketMessage, RaspberrySocketMessageAction
+from raspberry_client.client import RaspberryClient
+from websocket.message import FrontendWebSocketMessageAction, FrontendWebSocketMessage
 from websocket.server import WebSocketClientType
 
 
@@ -36,17 +36,15 @@ class StartRoutineEventHandler(Thread):
 
         self.turn_screen_off()
 
-    def send_routine_message(self, action: WebSocketMessageAction, data: dict):
+    def send_routine_message(self, action: FrontendWebSocketMessageAction, data: dict):
         message = FrontendWebSocketMessage(action=action, data=data)
         self.iva.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
 
     def turn_screen_on(self):
-        message = RaspberryWebSocketMessage(action=RaspberrySocketMessageAction.SCREEN_ON)
-        self.iva.socket_server.send_message(message, [WebSocketClientType.RASPBERRY])
+        self.iva.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_ON))
 
     def turn_screen_off(self):
-        message = RaspberryWebSocketMessage(action=RaspberrySocketMessageAction.SCREEN_OFF)
-        self.iva.socket_server.send_message(message, [WebSocketClientType.RASPBERRY])
+        self.iva.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_OFF))
 
     def get_presenter_session(self) -> PresenterSession:
         if self.event.type == RoutineType.MORNING:
