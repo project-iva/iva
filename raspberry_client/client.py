@@ -5,8 +5,8 @@ import requests
 
 class RaspberryClient:
     class Action(str, Enum):
-        SCREEN_ON = 'screen_on'
-        SCREEN_OFF = 'screen_off'
+        SCREEN_ON = 'SCREEN_ON'
+        SCREEN_OFF = 'SCREEN_OFF'
 
     @staticmethod
     def send_action_request(action: Action):

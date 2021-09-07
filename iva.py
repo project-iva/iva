@@ -5,6 +5,7 @@ from typing import Dict
 from uuid import UUID
 
 from control_session.session import PresenterControlSession
+from event_handlers.backend_data_updated_event_handler import BackendDataUpdatedEventHandler
 from event_handlers.choose_meal_handler import ChooseMealHandler
 from event_handlers.command_handler import CommandHandler
 from event_handlers.day_plan_activity_event_handler import DayPlanActivityEventHandler
@@ -14,7 +15,7 @@ from event_handlers.start_routine_handler import StartRoutineEventHandler
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, ChooseMealEvent, \
-    ScheduleDayPlanEvent, DayPlanActivityEvent
+    ScheduleDayPlanEvent, DayPlanActivityEvent, BackendDataUpdatedEvent
 from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
 
@@ -37,6 +38,7 @@ class Iva(Thread):
             ChooseMealEvent: self.__handle_choose_meal_event,
             ScheduleDayPlanEvent: self.__handle_schedule_day_plan_event,
             DayPlanActivityEvent: self.__handle_day_plan_activity_event,
+            BackendDataUpdatedEvent: self.__handle_backend_data_updated_event
         }
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
@@ -84,4 +86,8 @@ class Iva(Thread):
 
     def __handle_day_plan_activity_event(self, day_plan_activity_event: DayPlanActivityEvent):
         handler = DayPlanActivityEventHandler(day_plan_activity_event, self.event_scheduler)
+        handler.start()
+
+    def __handle_backend_data_updated_event(self, data_updated_event: BackendDataUpdatedEvent):
+        handler = BackendDataUpdatedEventHandler(data_updated_event, self)
         handler.start()

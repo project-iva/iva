@@ -14,8 +14,8 @@ class Event:
 
 
 class RoutineType(str, Enum):
-    MORNING = 'morning'
-    EVENING = 'evening'
+    MORNING = 'MORNING'
+    EVENING = 'EVENING'
 
 
 @dataclass
@@ -65,3 +65,16 @@ class DayPlanActivityEvent(Event):
 
     def __lt__(self, other: DayPlanActivityEvent):
         return self.activity.start_time < other.activity.start_time
+
+
+@dataclass
+class BackendDataUpdatedEvent(Event):
+    class DataType(str, Enum):
+        CALORIES = 'CALORIES',
+        BODY_MASS = 'BODY_MASS',
+        DAY_PLAN = 'DAY_PLAN',
+        DAY_GOALS = 'DAY_GOALS',
+        SLEEP = 'SLEEP',
+        MINDFUL_SESSIONS = 'MINDFUL_SESSIONS',
+
+    data_type: DataType

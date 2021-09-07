@@ -3,12 +3,14 @@ from flask_restful import Resource, Api, reqparse, abort
 from uuid import UUID
 
 from control_session.session import PresenterControlSession, ControlSessionAction, InvalidControlSessionActionException
+from events.events import BackendDataUpdatedEvent
 
 app = Flask(__name__)
 api = Api(app)
 
 control_session_action_parser = reqparse.RequestParser()
-control_session_action_parser.add_argument('action', required=True, type=ControlSessionAction, choices=list(ControlSessionAction))
+control_session_action_parser.add_argument('action', required=True, type=ControlSessionAction,
+                                           choices=list(ControlSessionAction))
 
 
 def get_control_session_or_abort(control_session_uuid: UUID) -> PresenterControlSession:
@@ -49,12 +51,20 @@ class ControlSessionListResource(Resource):
         return sessions
 
 
-class DayPlanChangedResource(Resource):
+data_updated_type_parser = reqparse.RequestParser()
+data_updated_type_parser.add_argument('data_type', required=True, type=BackendDataUpdatedEvent.DataType,
+                                      choices=list(BackendDataUpdatedEvent.DataType))
+
+
+class BackendDataUpdatedResource(Resource):
     def post(self):
-        app.iva.refresh_day_plan()
+        args = data_updated_type_parser.parse_args()
+        data_type = args['data_type']
+        data_updated_event = BackendDataUpdatedEvent(data_type)
+        app.iva.event_scheduler.schedule_event(data_updated_event)
         return Response(status=204)
 
 
 api.add_resource(ControlSessionListResource, '/control-sessions/')
 api.add_resource(ControlSessionResource, '/control-sessions/<uuid:session_uuid>/')
-api.add_resource(DayPlanChangedResource, '/day-plan-changed/')
+api.add_resource(BackendDataUpdatedResource, '/backend-data-updated/')

@@ -14,10 +14,10 @@ class InvalidControlSessionActionException(Exception):
 
 
 class ControlSessionAction(str, Enum):
-    START_PRESENTING = 'start_presenting'
-    NEXT = 'next'
-    PREV = 'prev'
-    CONFIRM = 'confirm'
+    START_PRESENTING = 'START_PRESENTING'
+    NEXT = 'NEXT'
+    PREV = 'PREV'
+    CONFIRM = 'CONFIRM'
 
 
 @dataclass
@@ -27,8 +27,8 @@ class PresenterItem:
 
 
 class PresenterSessionType(str, Enum):
-    ROUTINE = 'routine'
-    MEAL_CHOICES = 'meal_choices'
+    ROUTINE = 'ROUTINE'
+    MEAL_CHOICES = 'MEAL_CHOICES'
 
 
 @dataclass
