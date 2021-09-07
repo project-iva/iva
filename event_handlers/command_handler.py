@@ -1,7 +1,8 @@
 from threading import Thread
 
 from event_scheduler import EventScheduler
-from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, RoutineType, RaspberryEvent
+from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, RoutineType, RaspberryEvent, \
+    RefreshFrontendComponentEvent
 from raspberry_client.client import RaspberryClient
 
 
@@ -14,7 +15,8 @@ class CommandHandler(Thread):
             'start_routine': self.__handle_start_routine_command,
             'turn_screen_on': self.__handle_turn_screen_on_command,
             'turn_screen_off': self.__handle_turn_screen_off_command,
-            'choose_meal': self.__handle_choose_meal_command
+            'choose_meal': self.__handle_choose_meal_command,
+            'refresh_component': self.__handle_refresh_component_command
         }
 
     def run(self):
@@ -25,7 +27,7 @@ class CommandHandler(Thread):
             print(f'Undefined command: "{self.command_event.command}"')
 
     def __handle_start_routine_command(self):
-        # handle a missing parameter
+        # TODO: handle a missing parameter
         routine_type = RoutineType(self.command_event.args[0])
         self.event_scheduler.schedule_event(StartRoutineEvent(routine_type))
 
@@ -37,3 +39,8 @@ class CommandHandler(Thread):
 
     def __handle_choose_meal_command(self):
         self.event_scheduler.schedule_event(ChooseMealEvent())
+
+    def __handle_refresh_component_command(self):
+        # TODO: handle a missing parameter
+        component = RefreshFrontendComponentEvent.Component(self.command_event.args[0])
+        self.event_scheduler.schedule_event(RefreshFrontendComponentEvent(component))
