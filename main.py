@@ -33,7 +33,7 @@ def main():
     # event_scheduler.schedule_timed_event(DailyTimedEvent(StartMorningRoutineEvent(), datetime.datetime.now() + timedelta(seconds=5)))
 
     flask_app.iva = iva
-    threading.Thread(target=flask_app.run, kwargs={'debug': True, 'use_reloader': False}).start()
+    threading.Thread(target=flask_app.run, kwargs={'host': '0.0.0.0', 'debug': True, 'use_reloader': False}).start()
 
 
 main()
