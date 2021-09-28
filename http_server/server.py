@@ -4,6 +4,7 @@ from uuid import UUID
 
 from control_session.session import PresenterControlSession, ControlSessionAction, InvalidControlSessionActionException
 from events.events import BackendDataUpdatedEvent
+from raspberry_client.client import RaspberryClient
 
 app = Flask(__name__)
 api = Api(app)
@@ -65,6 +66,20 @@ class BackendDataUpdatedResource(Resource):
         return Response(status=204)
 
 
+raspberry_action_parser = reqparse.RequestParser()
+raspberry_action_parser.add_argument('action', required=True, type=RaspberryClient.Action,
+                                     choices=list(RaspberryClient.Action))
+
+
+class RaspberryClientResource(Resource):
+    def post(self):
+        args = raspberry_action_parser.parse_args()
+        action = args['action']
+        RaspberryClient.send_action_request(action)
+        return Response(status=204)
+
+
 api.add_resource(ControlSessionListResource, '/control-sessions/')
 api.add_resource(ControlSessionResource, '/control-sessions/<uuid:session_uuid>/')
 api.add_resource(BackendDataUpdatedResource, '/backend-data-updated/')
+api.add_resource(RaspberryClientResource, '/invoke-raspberry-client-action/')
