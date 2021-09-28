@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List
 from datetime import datetime, date
 from models.json_model import JsonModel
+import pytz
 
 
 class DayPlanActivityType(str, Enum):
@@ -28,7 +29,14 @@ class DayPlanActivity(JsonModel):
     def from_dict(cls, d):
         def convert_string_time_to_datetime(time: str) -> datetime:
             current_date = datetime.now().date()
-            return datetime.combine(current_date, datetime.strptime(time, '%H:%M:%S').time())
+            ams_tz = pytz.timezone('Europe/Amsterdam')
+            # activities come in AMS time
+            ams_datetime = ams_tz.localize(datetime.combine(current_date, datetime.strptime(time, '%H:%M:%S').time()))
+            # convert to UTC
+            utc_datetime = ams_datetime.astimezone(pytz.utc)
+            # strip timezone again for easy use
+            # TODO: instead of stripping tzinfo, make everything (for example scheduler) timezone aware
+            return utc_datetime.replace(tzinfo=None)
 
         return cls(
             d.get('name'),

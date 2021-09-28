@@ -17,6 +17,7 @@ python-dotenv = "*"
 requests = "*"
 flask = "*"
 flask_restful = "*"
+pytz = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.8"
