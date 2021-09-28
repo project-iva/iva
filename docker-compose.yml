@@ -8,8 +8,10 @@ services:
     volumes:
       - .:/usr/src/app/
     ports:
-    - 5678:5678
-    - 5000:5000
+      - "5678:5678"
+      - "5000:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     labels:
       - traefik.enable=true
       - traefik.frontend.rule=Host:iva.docker.localhost
