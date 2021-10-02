@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from models.day_plan import DayPlanActivity
 from raspberry_client.client import RaspberryClient
@@ -42,6 +42,7 @@ class UtteranceEvent(Event):
 @dataclass
 class RaspberryEvent(Event):
     action: RaspberryClient.Action
+    data: Optional[dict] = None
 
 
 @dataclass

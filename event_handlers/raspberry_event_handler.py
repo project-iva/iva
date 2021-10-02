@@ -10,4 +10,4 @@ class RaspberryEventHandler(Thread):
 
     def run(self):
         print(f'Handling {self.raspberry_event}')
-        RaspberryClient.send_action_request(self.raspberry_event.action)
+        RaspberryClient.send_action_request(self.raspberry_event.action, self.raspberry_event.data)

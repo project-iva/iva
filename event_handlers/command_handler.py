@@ -16,7 +16,8 @@ class CommandHandler(Thread):
             'turn_screen_on': self.__handle_turn_screen_on_command,
             'turn_screen_off': self.__handle_turn_screen_off_command,
             'choose_meal': self.__handle_choose_meal_command,
-            'refresh_component': self.__handle_refresh_component_command
+            'refresh_component': self.__handle_refresh_component_command,
+            'say': self.__handle_say_command
         }
 
     def run(self):
@@ -44,3 +45,10 @@ class CommandHandler(Thread):
         # TODO: handle a missing parameter
         component = RefreshFrontendComponentEvent.Component(self.command_event.args[0])
         self.event_scheduler.schedule_event(RefreshFrontendComponentEvent(component))
+
+    def __handle_say_command(self):
+        text_to_say = ' '.join(self.command_event.args)
+        extra_data = {
+            'tts_data': text_to_say
+        }
+        self.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SAY, extra_data))
