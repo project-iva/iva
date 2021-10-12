@@ -10,13 +10,15 @@ from event_handlers.choose_meal_handler import ChooseMealHandler
 from event_handlers.command_handler import CommandHandler
 from event_handlers.day_plan_activity_event_handler import DayPlanActivityEventHandler
 from event_handlers.raspberry_event_handler import RaspberryEventHandler
+from event_handlers.refresh_day_data_handler import RefreshDayDataEventHandler
 from event_handlers.refresh_frontend_component_event_handler import RefreshFrontendComponentEventHandler
 from event_handlers.schedule_day_plan_handler import ScheduleDayPlanHandler
 from event_handlers.start_routine_handler import StartRoutineEventHandler
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, ChooseMealEvent, \
-    ScheduleDayPlanEvent, DayPlanActivityEvent, BackendDataUpdatedEvent, RefreshFrontendComponentEvent
+    ScheduleDayPlanEvent, DayPlanActivityEvent, BackendDataUpdatedEvent, RefreshFrontendComponentEvent, \
+    RefreshDayDataEvent
 from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
 
@@ -41,6 +43,7 @@ class Iva(Thread):
             DayPlanActivityEvent: self.__handle_day_plan_activity_event,
             BackendDataUpdatedEvent: self.__handle_backend_data_updated_event,
             RefreshFrontendComponentEvent: self.__handle_refresh_frontend_component_event,
+            RefreshDayDataEvent: self.__handle_refresh_day_data_event,
         }
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
@@ -96,4 +99,8 @@ class Iva(Thread):
 
     def __handle_refresh_frontend_component_event(self, refresh_frontend_component_event: RefreshFrontendComponentEvent):
         handler = RefreshFrontendComponentEventHandler(refresh_frontend_component_event, self)
+        handler.start()
+
+    def __handle_refresh_day_data_event(self, event: RefreshDayDataEvent):
+        handler = RefreshDayDataEventHandler(event, self.event_scheduler)
         handler.start()

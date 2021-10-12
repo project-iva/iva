@@ -1,9 +1,11 @@
+import datetime
 import os
 import threading
 from queue import Queue
 from dotenv import load_dotenv
 from event_scheduler import EventScheduler
-from events.events import ScheduleDayPlanEvent
+from events.events import ScheduleDayPlanEvent, RefreshDayDataEvent
+from events.timed_events import DailyTimedEvent
 from http_server.server import app as flask_app
 from iva import Iva
 from slack_client.handler import SlackClientHandler
@@ -30,7 +32,12 @@ def main():
     iva.start()
 
     event_scheduler.schedule_event(ScheduleDayPlanEvent())
-    # event_scheduler.schedule_timed_event(DailyTimedEvent(StartMorningRoutineEvent(), datetime.datetime.now() + timedelta(seconds=5)))
+
+    # start automatic refreshing of data and views at 2 AM
+    event_scheduler.schedule_timed_event(
+        DailyTimedEvent(RefreshDayDataEvent(),
+                        datetime.datetime.now().replace(hour=2, minute=0) + datetime.timedelta(days=1))
+    )
 
     flask_app.iva = iva
     threading.Thread(target=flask_app.run, kwargs={'host': '0.0.0.0', 'debug': True, 'use_reloader': False}).start()

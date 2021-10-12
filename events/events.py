@@ -92,3 +92,8 @@ class RefreshFrontendComponentEvent(Event):
         MINDFUL_SESSIONS_STATS_VIEW = 'MINDFUL_SESSIONS_STATS_VIEW'
 
     component: Component
+
+
+@dataclass
+class RefreshDayDataEvent(Event):
+    pass
