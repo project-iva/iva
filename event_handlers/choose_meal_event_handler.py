@@ -11,7 +11,7 @@ from control_session.session import PresenterControlSession, PresenterItem, Cont
 from events.events import ChooseMealEvent
 
 
-class ChooseMealHandler(Thread):
+class ChooseMealEventHandler(Thread):
     def __init__(self, choose_meal_event: ChooseMealEvent, iva: Iva):
         super().__init__()
         self.choose_meal_event = choose_meal_event

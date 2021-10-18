@@ -5,7 +5,7 @@ from event_scheduler import EventScheduler
 from events.events import ScheduleDayPlanEvent, DayPlanActivityEvent
 
 
-class ScheduleDayPlanHandler(Thread):
+class ScheduleDayPlanEventHandler(Thread):
     def __init__(self, schedule_day_plan_event: ScheduleDayPlanEvent, event_scheduler: EventScheduler):
         super().__init__()
         self.schedule_day_plan_event = schedule_day_plan_event

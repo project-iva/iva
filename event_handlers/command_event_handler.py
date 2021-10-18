@@ -6,7 +6,7 @@ from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, Rout
 from raspberry_client.client import RaspberryClient
 
 
-class CommandHandler(Thread):
+class CommandEventHandler(Thread):
     def __init__(self, command_event: CommandEvent, event_scheduler: EventScheduler):
         super().__init__()
         self.command_event = command_event
