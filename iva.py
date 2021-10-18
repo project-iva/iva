@@ -14,6 +14,7 @@ from event_handlers.refresh_day_data_event_handler import RefreshDayDataEventHan
 from event_handlers.refresh_frontend_component_event_handler import RefreshFrontendComponentEventHandler
 from event_handlers.schedule_day_plan_event_handler import ScheduleDayPlanEventHandler
 from event_handlers.start_routine_event_handler import StartRoutineEventHandler
+from event_handlers.utterance_event_handler import UtteranceEventHandler
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, ChooseMealEvent, \
@@ -75,7 +76,8 @@ class Iva(Thread):
         handler.start()
 
     def __handle_utterance_event(self, utterance_event: UtteranceEvent):
-        pass
+        handler = UtteranceEventHandler(utterance_event, self.slack_client)
+        handler.start()
 
     def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
         handler = RaspberryEventHandler(raspberry_event)
