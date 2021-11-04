@@ -1,5 +1,4 @@
 from threading import Thread
-
 from typing import Tuple
 
 from backend_client.client import BackendClient
@@ -10,16 +9,16 @@ from slack_client.session import SlackSession
 
 
 class UtteranceEventHandler(Thread):
-    def __init__(self, event: UtteranceEvent, slack_client: SlackClientHandler):
+    def __init__(self, event: UtteranceEvent, slack_client: SlackClientHandler, classifier: IntentClassifier):
         super().__init__()
         self.event = event
         self.slack_client = slack_client
-        self.classifier = IntentClassifier()
+        self.classifier = classifier
 
     def run(self):
         print(f'Handling {self.event}')
 
-        intent_prediction = self.classifier.classify(self.event.utterance)
+        intent_prediction = self.classifier.request_classification(self.event.utterance).get()
         sorted_intent_prediction = sorted(intent_prediction.items(), key=lambda item: item[1], reverse=True)
         intent_choices, message = self.construct_choices_and_message(sorted_intent_prediction)
         self.slack_client.send_message(message)
@@ -52,8 +51,10 @@ class UtteranceEventHandler(Thread):
             self.slack_client.send_message('What should be the new intent called?')
             new_intent = session.wait_for_an_utterance()
             BackendClient.post_training_instance_for_new_intent(message, new_intent)
+            # Refresh template with new intent
+            self.classifier.refresh_intent_classification_template()
         elif chosen_intent == 'SKIP':
-            # assume the model made a correct prediction and store the sample
+            # assume the classifier made a correct prediction and store the sample
             highest_confidence_intent, _ = sorted_intent_prediction[0]
             BackendClient.post_training_instance_for_intent(message, highest_confidence_intent)
         else:

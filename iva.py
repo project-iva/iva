@@ -20,19 +20,21 @@ from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, ChooseMealEvent, \
     ScheduleDayPlanEvent, DayPlanActivityEvent, BackendDataUpdatedEvent, RefreshFrontendComponentEvent, \
     RefreshDayDataEvent
+from intent_classifier.classifier import IntentClassifier
 from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
 
 
 class Iva(Thread):
     def __init__(self, event_queue: Queue, event_scheduler: EventScheduler,
-                 socket_server: WebSocketServer, slack_client: SlackClientHandler):
+                 socket_server: WebSocketServer, slack_client: SlackClientHandler, intent_classifier: IntentClassifier):
         super().__init__()
         self.event_queue = event_queue
         self.event_scheduler = event_scheduler
         self.socket_server = socket_server
         self.slack_client = slack_client
         self.control_sessions: Dict[UUID, PresenterControlSession] = {}
+        self.intent_classifier = intent_classifier
 
         self.dispatcher = {
             StartRoutineEvent: self.__handle_start_routine_event,
@@ -76,7 +78,7 @@ class Iva(Thread):
         handler.start()
 
     def __handle_utterance_event(self, utterance_event: UtteranceEvent):
-        handler = UtteranceEventHandler(utterance_event, self.slack_client)
+        handler = UtteranceEventHandler(utterance_event, self.slack_client, self.intent_classifier)
         handler.start()
 
     def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
