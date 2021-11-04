@@ -2,9 +2,12 @@ import os
 from typing import List
 
 import requests as requests
+from uuid import UUID
 
 from models.day_plan import DayPlan
+from models.intent import Intent
 from models.meal import Meal, ChosenMeal
+from models.training_instance import TrainingInstance
 
 
 class BackendClient:
@@ -35,3 +38,28 @@ class BackendClient:
         response = requests.get(f'{base_api_url}/current-day-plan/')
         day_plan = DayPlan.from_dict(response.json())
         return day_plan
+
+    @staticmethod
+    def get_intents() -> List[Intent]:
+        return []
+
+    @staticmethod
+    def post_intent(intent: str) -> Intent:
+        pass
+
+    @staticmethod
+    def post_training_instance(message: str, intent_uuid: UUID):
+        training_instance = TrainingInstance(message, intent_uuid)
+        # TODO: post training instance
+
+    @staticmethod
+    def post_training_instance_for_intent(message: str, intent: str):
+        intents = BackendClient.get_intents()
+        # TODO: find intent uuid
+        intent = intents[0]
+        BackendClient.post_training_instance(message, intent.uuid)
+
+    @staticmethod
+    def post_training_instance_for_new_intent(message: str, new_intent: str):
+        intent = BackendClient.post_intent(new_intent)
+        BackendClient.post_training_instance(message, intent.uuid)

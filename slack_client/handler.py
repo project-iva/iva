@@ -38,6 +38,9 @@ class SlackClientHandler(Thread):
 
     def __handle_slack_message_event(self, **payload):
         data = payload['data']
+        # ignore bot messages
+        if data.get('subtype') == 'bot_message':
+            return
         web_client = payload['web_client']
         text = data['text']
 
