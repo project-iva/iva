@@ -41,11 +41,20 @@ class BackendClient:
 
     @staticmethod
     def get_intents() -> List[Intent]:
-        return []
+        base_api_url = BackendClient.get_backend_api_url()
+        response = requests.get(f'{base_api_url}/intents/')
+        return [Intent.from_dict(json_intent) for json_intent in response.json()]
 
     @staticmethod
     def post_intent(intent: str) -> Intent:
-        pass
+        base_api_url = BackendClient.get_backend_api_url()
+        data = {
+            'intent': intent
+        }
+        response = requests.post(f'{base_api_url}/intents/', data=data)
+        print(response.json())
+        response.raise_for_status()
+        return Intent.from_dict(response.json())
 
     @staticmethod
     def post_training_instance(message: str, intent_uuid: UUID):

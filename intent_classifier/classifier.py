@@ -1,6 +1,8 @@
 from queue import Queue
 from threading import Thread
 
+from backend_client.client import BackendClient
+
 
 class IntentClassifier(Thread):
     def __init__(self):
@@ -33,6 +35,5 @@ class IntentClassifier(Thread):
         return template
 
     def refresh_intent_classification_template(self):
-        # TODO: fetch possible intents from the backend
-        possible_intents = []
-        self.intent_classification_template = {intent: 0 for intent in possible_intents}
+        possible_intents = BackendClient.get_intents()
+        self.intent_classification_template = {intent.intent: 0 for intent in possible_intents}
