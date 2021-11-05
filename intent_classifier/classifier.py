@@ -2,6 +2,7 @@ from queue import Queue
 from threading import Thread
 
 from backend_client.client import BackendClient
+from intent_classifier.client import IntentClassifierClient
 
 
 class IntentClassifier(Thread):
@@ -10,6 +11,7 @@ class IntentClassifier(Thread):
         self.intent_classification_template = {}
         self.refresh_intent_classification_template()
         self.classification_requests = Queue()
+        self.client = IntentClassifierClient()
 
     def run(self):
         print(f'Intent classifier started!')
@@ -26,11 +28,7 @@ class IntentClassifier(Thread):
 
     def __classify(self, utterance: str) -> dict:
         template = self.intent_classification_template.copy()
-        classification_result = {
-            'INTRODUCTION': 0.7,
-            'GET_TIME': 0.2,
-            'SAY': 0.1
-        }
+        classification_result = self.client.make_classification_request(utterance)
         template.update(classification_result)
         return template
 
