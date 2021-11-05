@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 import requests as requests
 from uuid import UUID
@@ -52,21 +52,29 @@ class BackendClient:
             'intent': intent
         }
         response = requests.post(f'{base_api_url}/intents/', data=data)
-        print(response.json())
         response.raise_for_status()
         return Intent.from_dict(response.json())
 
     @staticmethod
     def post_training_instance(message: str, intent_uuid: UUID):
-        training_instance = TrainingInstance(message, intent_uuid)
-        # TODO: post training instance
+        training_instance = TrainingInstance(message, str(intent_uuid))
+        base_api_url = BackendClient.get_backend_api_url()
+        headers = {'Content-type': 'application/json'}
+        response = requests.post(f'{base_api_url}/training-instances/', data=training_instance.json, headers=headers)
+        response.raise_for_status()
 
     @staticmethod
     def post_training_instance_for_intent(message: str, intent: str):
+        def get_matching_intent(intent_name: str, intents: List[Intent]) -> Optional[Intent]:
+            for intent in intents:
+                if intent_name == intent.intent:
+                    return intent
+            return None
+
         intents = BackendClient.get_intents()
-        # TODO: find intent uuid
-        intent = intents[0]
-        BackendClient.post_training_instance(message, intent.uuid)
+        matching_intent = get_matching_intent(intent, intents)
+        if matching_intent:
+            BackendClient.post_training_instance(message, matching_intent.uuid)
 
     @staticmethod
     def post_training_instance_for_new_intent(message: str, new_intent: str):

@@ -33,7 +33,7 @@ class UtteranceEventHandler(Thread):
 
         chosen_intent = intent_choices[choice]
         print(f'chosen intent: {chosen_intent}')
-        self.handle_chosen_intent(message, sorted_intent_prediction, chosen_intent, session)
+        self.handle_chosen_intent(self.event.utterance, sorted_intent_prediction, chosen_intent, session)
         self.slack_client.close_active_session()
 
     def construct_choices_and_message(self, intent_prediction) -> Tuple[list, str]:
