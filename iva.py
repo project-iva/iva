@@ -78,7 +78,8 @@ class Iva(Thread):
         handler.start()
 
     def __handle_utterance_event(self, utterance_event: UtteranceEvent):
-        handler = UtteranceEventHandler(utterance_event, self.slack_client, self.intent_classifier)
+        handler = UtteranceEventHandler(utterance_event, self.slack_client, self.intent_classifier,
+                                        self.event_scheduler)
         handler.start()
 
     def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
@@ -101,7 +102,8 @@ class Iva(Thread):
         handler = BackendDataUpdatedEventHandler(data_updated_event, self)
         handler.start()
 
-    def __handle_refresh_frontend_component_event(self, refresh_frontend_component_event: RefreshFrontendComponentEvent):
+    def __handle_refresh_frontend_component_event(self,
+                                                  refresh_frontend_component_event: RefreshFrontendComponentEvent):
         handler = RefreshFrontendComponentEventHandler(refresh_frontend_component_event, self)
         handler.start()
 

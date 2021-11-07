@@ -1,19 +1,24 @@
+from datetime import datetime
 from threading import Thread
 from typing import Tuple
 
 from backend_client.client import BackendClient
-from events.events import UtteranceEvent
+from event_scheduler import EventScheduler
+from events.events import UtteranceEvent, RaspberryEvent
 from intent_classifier.classifier import IntentClassifier
+from raspberry_client.client import RaspberryClient
 from slack_client.handler import SlackClientHandler
 from slack_client.session import SlackSession
 
 
 class UtteranceEventHandler(Thread):
-    def __init__(self, event: UtteranceEvent, slack_client: SlackClientHandler, classifier: IntentClassifier):
+    def __init__(self, event: UtteranceEvent, slack_client: SlackClientHandler, classifier: IntentClassifier,
+                 event_scheduler: EventScheduler):
         super().__init__()
         self.event = event
         self.slack_client = slack_client
         self.classifier = classifier
+        self.event_scheduler = event_scheduler
 
     def run(self):
         print(f'Handling {self.event}')
@@ -34,7 +39,8 @@ class UtteranceEventHandler(Thread):
         chosen_intent = intent_choices[choice]
         print(f'chosen intent: {chosen_intent}')
         intent = self.process_and_store_intent(self.event.utterance, sorted_intent_prediction, chosen_intent, session)
-        self.handle_intent(intent)
+        if intent:
+            self.handle_intent(intent)
         self.slack_client.close_active_session()
 
     def construct_choices_and_message(self, intent_prediction) -> Tuple[list, str]:
@@ -65,3 +71,23 @@ class UtteranceEventHandler(Thread):
 
     def handle_intent(self, intent: str):
         print(f'Handling {intent} intent')
+        dispatcher = {
+            'introduce_yourself': self.handle_introduce_yourself_intent,
+            'tell_time': self.handle_tell_time_intent,
+            'turn_screen_on': self.handle_turn_screen_on_intent,
+            'turn_screen_off': self.handle_turn_screen_off_intent
+        }
+        dispatcher[intent]()
+
+    def handle_introduce_yourself_intent(self):
+        self.slack_client.send_message('I am IVA.')
+
+    def handle_tell_time_intent(self):
+        current_time = datetime.now().strftime("%H:%M:%S")
+        self.slack_client.send_message(f'The time is {current_time}')
+
+    def handle_turn_screen_on_intent(self):
+        self.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_ON))
+
+    def handle_turn_screen_off_intent(self):
+        self.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_OFF))
