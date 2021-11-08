@@ -102,11 +102,11 @@ class RefreshDayDataEvent(Event):
 @dataclass
 class UtteranceIntentEvent(Event):
     class Intent(str, Enum):
-        turn_screen_on = 'turn_screen_on'
-        turn_screen_off = 'turn_screen_off'
-        introduce_yourself = 'introduce_yourself'
-        tell_time = 'tell_time'
-        spotify_play = 'spotify_play'
-        spotify_stop = 'spotify_stop'
+        TURN_SCREEN_ON = 'turn_screen_on'
+        TURN_SCREEN_OFF = 'turn_screen_off'
+        INTRODUCE_YOURSELF = 'introduce_yourself'
+        TELL_TIME = 'tell_time'
+        SPOTIFY_PLAY = 'spotify_play'
+        SPOTIFY_STOP = 'spotify_stop'
 
     intent: Intent
