@@ -77,7 +77,8 @@ class UtteranceEventHandler(Thread):
             'turn_screen_on': self.handle_turn_screen_on_intent,
             'turn_screen_off': self.handle_turn_screen_off_intent
         }
-        dispatcher[intent]()
+        if intent in dispatcher:
+            dispatcher[intent]()
 
     def handle_introduce_yourself_intent(self):
         self.slack_client.send_message('I am IVA.')
