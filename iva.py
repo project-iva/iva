@@ -15,11 +15,12 @@ from event_handlers.refresh_frontend_component_event_handler import RefreshFront
 from event_handlers.schedule_day_plan_event_handler import ScheduleDayPlanEventHandler
 from event_handlers.start_routine_event_handler import StartRoutineEventHandler
 from event_handlers.utterance_event_handler import UtteranceEventHandler
+from event_handlers.utterance_intent_event_handler import UtteranceIntentEventHandler
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, ChooseMealEvent, \
     ScheduleDayPlanEvent, DayPlanActivityEvent, BackendDataUpdatedEvent, RefreshFrontendComponentEvent, \
-    RefreshDayDataEvent
+    RefreshDayDataEvent, UtteranceIntentEvent
 from intent_classifier.classifier import IntentClassifier
 from slack_client.handler import SlackClientHandler
 from websocket.server import WebSocketServer
@@ -47,6 +48,7 @@ class Iva(Thread):
             BackendDataUpdatedEvent: self.__handle_backend_data_updated_event,
             RefreshFrontendComponentEvent: self.__handle_refresh_frontend_component_event,
             RefreshDayDataEvent: self.__handle_refresh_day_data_event,
+            UtteranceIntentEvent: self.__handle_utterance_intent_event,
         }
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
@@ -109,4 +111,8 @@ class Iva(Thread):
 
     def __handle_refresh_day_data_event(self, event: RefreshDayDataEvent):
         handler = RefreshDayDataEventHandler(event, self.event_scheduler)
+        handler.start()
+
+    def __handle_utterance_intent_event(self, event: UtteranceIntentEvent):
+        handler = UtteranceIntentEventHandler(event, self.event_scheduler, self.slack_client)
         handler.start()
