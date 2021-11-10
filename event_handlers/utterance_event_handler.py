@@ -1,18 +1,18 @@
+from __future__ import annotations
 from threading import Thread
 from typing import Tuple, Optional
 
 from backend_client.client import BackendClient
-from event_scheduler import EventScheduler
 from events.events import UtteranceEvent, UtteranceIntentEvent
 from intent_classifier.classifier import IntentClassifier
 
 
 class UtteranceEventHandler(Thread):
-    def __init__(self, event: UtteranceEvent, classifier: IntentClassifier, event_scheduler: EventScheduler):
+    def __init__(self, event: UtteranceEvent, classifier: IntentClassifier, iva: Iva):
         super().__init__()
         self.event = event
         self.classifier = classifier
-        self.event_scheduler = event_scheduler
+        self.iva = iva
 
     def run(self):
         print(f'Handling {self.event}')
@@ -24,7 +24,7 @@ class UtteranceEventHandler(Thread):
         intent, _ = sorted_intent_prediction[0]
 
         # TODO: should confirm? check config
-        if True:
+        if self.iva.config.ask_user_to_confirm_intent_prediction:
             confirmed_intent = self.confirm_intent_prediction(sorted_intent_prediction)
             if confirmed_intent:
                 intent = confirmed_intent
@@ -87,4 +87,4 @@ class UtteranceEventHandler(Thread):
             return
         else:
             utterance_intent_event = UtteranceIntentEvent(utterance_intent, self.event.output_provider)
-            self.event_scheduler.schedule_event(utterance_intent_event)
+            self.iva.event_scheduler.schedule_event(utterance_intent_event)

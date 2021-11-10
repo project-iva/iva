@@ -24,6 +24,7 @@ from events.events import StartRoutineEvent, CommandEvent, \
 from intent_classifier.classifier import IntentClassifier
 from interactions.input_provider import InputProvider
 from interactions.output_provider import OutputProvider
+from iva_config import IvaConfig
 from slack_client.handler import SlackClientHandler
 from tts_client.tts_client import TextToSpeechClient
 from websocket.server import WebSocketServer
@@ -40,6 +41,7 @@ class Iva(Thread):
         self.control_sessions: Dict[UUID, PresenterControlSession] = {}
         self.intent_classifier = intent_classifier
         self.tts_client = TextToSpeechClient(self.event_scheduler)
+        self.config = IvaConfig()
 
         self.dispatcher = {
             StartRoutineEvent: self.__handle_start_routine_event,
@@ -90,11 +92,15 @@ class Iva(Thread):
         handler.start()
 
     def __handle_command_event(self, command_event: CommandEvent):
-        handler = CommandEventHandler(command_event, self.event_scheduler, self.tts_client)
+        handler = CommandEventHandler(command_event, self)
         handler.start()
 
     def __handle_utterance_event(self, utterance_event: UtteranceEvent):
-        handler = UtteranceEventHandler(utterance_event, self.intent_classifier, self.event_scheduler)
+        handler = UtteranceEventHandler(utterance_event, self.intent_classifier, self)
+        handler.start()
+
+    def __handle_utterance_intent_event(self, event: UtteranceIntentEvent):
+        handler = UtteranceIntentEventHandler(event, self.event_scheduler)
         handler.start()
 
     def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
@@ -124,8 +130,4 @@ class Iva(Thread):
 
     def __handle_refresh_day_data_event(self, event: RefreshDayDataEvent):
         handler = RefreshDayDataEventHandler(event, self.event_scheduler)
-        handler.start()
-
-    def __handle_utterance_intent_event(self, event: UtteranceIntentEvent):
-        handler = UtteranceIntentEventHandler(event, self.event_scheduler)
         handler.start()
