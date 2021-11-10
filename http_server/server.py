@@ -87,8 +87,7 @@ class UtteranceResource(Resource):
     def post(self):
         args = utterance_parser.parse_args()
         utterance = args['utterance']
-        utterance_event = UtteranceEvent(utterance)
-        app.iva.event_scheduler.schedule_event(utterance_event)
+        app.iva.handle_utterance(utterance)
         return Response(status=204)
 
 

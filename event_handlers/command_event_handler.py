@@ -4,13 +4,15 @@ from event_scheduler import EventScheduler
 from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, RoutineType, RaspberryEvent, \
     RefreshFrontendComponentEvent
 from raspberry_client.client import RaspberryClient
+from tts_client.tts_client import TextToSpeechClient
 
 
 class CommandEventHandler(Thread):
-    def __init__(self, command_event: CommandEvent, event_scheduler: EventScheduler):
+    def __init__(self, command_event: CommandEvent, event_scheduler: EventScheduler, tts_client: TextToSpeechClient):
         super().__init__()
         self.command_event = command_event
         self.event_scheduler = event_scheduler
+        self.tts_client = tts_client
         self.command_dispatcher = {
             'start_routine': self.__handle_start_routine_command,
             'turn_screen_on': self.__handle_turn_screen_on_command,
@@ -48,7 +50,4 @@ class CommandEventHandler(Thread):
 
     def __handle_say_command(self):
         text_to_say = ' '.join(self.command_event.args)
-        extra_data = {
-            'tts_data': text_to_say
-        }
-        self.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SAY, extra_data))
+        self.tts_client.output(text_to_say)

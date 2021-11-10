@@ -1,7 +1,7 @@
 import uuid
 from queue import Queue
 from threading import Thread
-from typing import Dict
+from typing import Dict, Optional
 from uuid import UUID
 
 from control_session.session import PresenterControlSession
@@ -22,7 +22,10 @@ from events.events import StartRoutineEvent, CommandEvent, \
     ScheduleDayPlanEvent, DayPlanActivityEvent, BackendDataUpdatedEvent, RefreshFrontendComponentEvent, \
     RefreshDayDataEvent, UtteranceIntentEvent
 from intent_classifier.classifier import IntentClassifier
+from interactions.input_provider import InputProvider
+from interactions.output_provider import OutputProvider
 from slack_client.handler import SlackClientHandler
+from tts_client.tts_client import TextToSpeechClient
 from websocket.server import WebSocketServer
 
 
@@ -36,6 +39,7 @@ class Iva(Thread):
         self.slack_client = slack_client
         self.control_sessions: Dict[UUID, PresenterControlSession] = {}
         self.intent_classifier = intent_classifier
+        self.tts_client = TextToSpeechClient(self.event_scheduler)
 
         self.dispatcher = {
             StartRoutineEvent: self.__handle_start_routine_event,
@@ -65,6 +69,16 @@ class Iva(Thread):
     def refresh_day_plan(self):
         self.__handle_schedule_day_plan_event(ScheduleDayPlanEvent())
 
+    def handle_utterance(self, utterance: str, input_provider: Optional[InputProvider] = None,
+                         output_provider: Optional[OutputProvider] = None):
+        if not output_provider:
+            # use TTS as default output provider
+            output_provider = self.tts_client
+
+        self.event_scheduler.schedule_event(
+            UtteranceEvent(utterance=utterance, input_provider=input_provider, output_provider=output_provider)
+        )
+
     def run(self):
         while True:
             event = self.event_queue.get()
@@ -76,7 +90,7 @@ class Iva(Thread):
         handler.start()
 
     def __handle_command_event(self, command_event: CommandEvent):
-        handler = CommandEventHandler(command_event, self.event_scheduler)
+        handler = CommandEventHandler(command_event, self.event_scheduler, self.tts_client)
         handler.start()
 
     def __handle_utterance_event(self, utterance_event: UtteranceEvent):
