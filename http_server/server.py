@@ -3,7 +3,7 @@ from flask_restful import Resource, Api, reqparse, abort
 from uuid import UUID
 
 from control_session.session import PresenterControlSession, ControlSessionAction, InvalidControlSessionActionException
-from events.events import BackendDataUpdatedEvent
+from events.events import BackendDataUpdatedEvent, UtteranceEvent
 from raspberry_client.client import RaspberryClient
 
 app = Flask(__name__)
@@ -79,7 +79,21 @@ class RaspberryClientResource(Resource):
         return Response(status=204)
 
 
+utterance_parser = reqparse.RequestParser()
+utterance_parser.add_argument('utterance', required=True, type=str)
+
+
+class UtteranceResource(Resource):
+    def post(self):
+        args = utterance_parser.parse_args()
+        utterance = args['utterance']
+        utterance_event = UtteranceEvent(utterance)
+        app.iva.event_scheduler.schedule_event(utterance_event)
+        return Response(status=204)
+
+
 api.add_resource(ControlSessionListResource, '/control-sessions/')
 api.add_resource(ControlSessionResource, '/control-sessions/<uuid:session_uuid>/')
 api.add_resource(BackendDataUpdatedResource, '/backend-data-updated/')
 api.add_resource(RaspberryClientResource, '/invoke-raspberry-client-action/')
+api.add_resource(UtteranceResource, '/utterance/')

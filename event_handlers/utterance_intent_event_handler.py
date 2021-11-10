@@ -4,15 +4,13 @@ from threading import Thread
 from event_scheduler import EventScheduler
 from events.events import UtteranceIntentEvent, RaspberryEvent
 from raspberry_client.client import RaspberryClient
-from slack_client.handler import SlackClientHandler
 
 
 class UtteranceIntentEventHandler(Thread):
-    def __init__(self, event: UtteranceIntentEvent, event_scheduler: EventScheduler, slack_client: SlackClientHandler):
+    def __init__(self, event: UtteranceIntentEvent, event_scheduler: EventScheduler):
         super().__init__()
         self.event = event
         self.event_scheduler = event_scheduler
-        self.slack_client = slack_client
         self.intent_dispatcher = {
             UtteranceIntentEvent.Intent.TURN_SCREEN_ON: self.__handle_turn_screen_on_intent,
             UtteranceIntentEvent.Intent.TURN_SCREEN_OFF: self.__handle_turn_screen_off_intent,
@@ -30,11 +28,13 @@ class UtteranceIntentEventHandler(Thread):
             print(f'Handler for {self.event.intent} is not implemented')
 
     def __handle_introduce_yourself_intent(self):
-        self.slack_client.send_message('I am IVA.')
+        if self.event.output_provider:
+            self.event.output_provider.output('I am IVA.')
 
     def __handle_tell_time_intent(self):
         current_time = datetime.now().strftime("%H:%M:%S")
-        self.slack_client.send_message(f'The time is {current_time}')
+        if self.event.output_provider:
+            self.event.output_provider.output(f'The time is {current_time}')
 
     def __handle_turn_screen_on_intent(self):
         self.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_ON))

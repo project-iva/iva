@@ -80,8 +80,7 @@ class Iva(Thread):
         handler.start()
 
     def __handle_utterance_event(self, utterance_event: UtteranceEvent):
-        handler = UtteranceEventHandler(utterance_event, self.slack_client, self.intent_classifier,
-                                        self.event_scheduler)
+        handler = UtteranceEventHandler(utterance_event, self.intent_classifier, self.event_scheduler)
         handler.start()
 
     def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
@@ -114,5 +113,5 @@ class Iva(Thread):
         handler.start()
 
     def __handle_utterance_intent_event(self, event: UtteranceIntentEvent):
-        handler = UtteranceIntentEventHandler(event, self.event_scheduler, self.slack_client)
+        handler = UtteranceIntentEventHandler(event, self.event_scheduler)
         handler.start()

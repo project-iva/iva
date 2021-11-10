@@ -3,6 +3,8 @@ from slack import RTMClient, WebClient
 
 from events.events import CommandEvent, UtteranceEvent
 from event_scheduler import EventScheduler
+from interactions.input_provider import InputProvider
+from interactions.output_provider import OutputProvider
 from slack_client.session import SlackSession
 
 
@@ -10,7 +12,7 @@ class UnableToCreateSlackSessionException(Exception):
     pass
 
 
-class SlackClientHandler(Thread):
+class SlackClientHandler(Thread, InputProvider, OutputProvider):
     def __init__(self, slack_client_token: str, event_scheduler: EventScheduler):
         super().__init__()
         self.event_scheduler = event_scheduler
@@ -22,7 +24,17 @@ class SlackClientHandler(Thread):
     def run(self):
         self.rtm_client.start()
 
-    def send_message(self, text: str):
+    def get_input(self) -> str:
+        session = SlackSession()
+        self.set_active_session(session)
+        utterance = session.wait_for_an_utterance()
+        self.close_active_session()
+        return utterance
+
+    def output(self, output: str):
+        self.__send_message(output)
+
+    def __send_message(self, text: str):
         self.slack_web_client.chat_postMessage(
             channel='#iva',
             text=text)
@@ -55,4 +67,6 @@ class SlackClientHandler(Thread):
             if self.active_session:
                 self.active_session.add_new_utterance(text)
             else:
-                self.event_scheduler.schedule_event(UtteranceEvent(utterance=text))
+                self.event_scheduler.schedule_event(
+                    UtteranceEvent(utterance=text, input_provider=self, output_provider=self)
+                )

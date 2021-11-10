@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
+from interactions.input_provider import InputProvider
+from interactions.output_provider import OutputProvider
 from models.day_plan import DayPlanActivity
 from raspberry_client.client import RaspberryClient
 
@@ -32,11 +34,6 @@ class MindfulSessionRecordedEvent(Event):
 class CommandEvent(Event):
     command: str
     args: List[str]
-
-
-@dataclass
-class UtteranceEvent(Event):
-    utterance: str
 
 
 @dataclass
@@ -100,6 +97,13 @@ class RefreshDayDataEvent(Event):
 
 
 @dataclass
+class UtteranceEvent(Event):
+    utterance: str
+    input_provider: Optional[InputProvider]
+    output_provider: Optional[OutputProvider]
+
+
+@dataclass
 class UtteranceIntentEvent(Event):
     class Intent(str, Enum):
         TURN_SCREEN_ON = 'turn_screen_on'
@@ -110,3 +114,4 @@ class UtteranceIntentEvent(Event):
         SPOTIFY_STOP = 'spotify_stop'
 
     intent: Intent
+    output_provider: Optional[OutputProvider]
