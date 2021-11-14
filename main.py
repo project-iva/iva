@@ -10,6 +10,7 @@ from http_server.server import app as flask_app
 from intent_classifier.classifier import IntentClassifier
 from iva import Iva
 from slack_client.handler import SlackClientHandler
+from spotify_wrapper.spotify_client_wrapper import SpotifyClientWrapper
 from websocket.server import WebSocketServer
 
 
@@ -32,7 +33,9 @@ def main():
     slack_client = SlackClientHandler(slack_client_token, event_scheduler)
     slack_client.start()
 
-    iva = Iva(event_queue, event_scheduler, frontend_socket_server, slack_client, intent_classifier)
+    spotify_client = SpotifyClientWrapper()
+
+    iva = Iva(event_queue, event_scheduler, frontend_socket_server, slack_client, intent_classifier, spotify_client)
     iva.start()
 
     event_scheduler.schedule_event(ScheduleDayPlanEvent())

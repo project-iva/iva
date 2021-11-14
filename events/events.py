@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, auto
 from typing import List, Optional
 
 from interactions.input_provider import InputProvider
@@ -115,3 +115,12 @@ class UtteranceIntentEvent(Event):
 
     intent: Intent
     output_provider: Optional[OutputProvider]
+
+
+@dataclass
+class SpotifyEvent(Event):
+    class Action(Enum):
+        PLAY = auto()
+        STOP = auto()
+
+    action: Action

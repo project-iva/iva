@@ -13,6 +13,7 @@ from event_handlers.raspberry_event_handler import RaspberryEventHandler
 from event_handlers.refresh_day_data_event_handler import RefreshDayDataEventHandler
 from event_handlers.refresh_frontend_component_event_handler import RefreshFrontendComponentEventHandler
 from event_handlers.schedule_day_plan_event_handler import ScheduleDayPlanEventHandler
+from event_handlers.spotify_event_handler import SpotifyEventHandler
 from event_handlers.start_routine_event_handler import StartRoutineEventHandler
 from event_handlers.utterance_event_handler import UtteranceEventHandler
 from event_handlers.utterance_intent_event_handler import UtteranceIntentEventHandler
@@ -20,19 +21,21 @@ from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, ChooseMealEvent, \
     ScheduleDayPlanEvent, DayPlanActivityEvent, BackendDataUpdatedEvent, RefreshFrontendComponentEvent, \
-    RefreshDayDataEvent, UtteranceIntentEvent
+    RefreshDayDataEvent, UtteranceIntentEvent, SpotifyEvent
 from intent_classifier.classifier import IntentClassifier
 from interactions.input_provider import InputProvider
 from interactions.output_provider import OutputProvider
 from iva_config import IvaConfig
 from slack_client.handler import SlackClientHandler
+from spotify_wrapper.spotify_client_wrapper import SpotifyClientWrapper
 from tts_client.tts_client import TextToSpeechClient
 from websocket.server import WebSocketServer
 
 
 class Iva(Thread):
-    def __init__(self, event_queue: Queue, event_scheduler: EventScheduler,
-                 socket_server: WebSocketServer, slack_client: SlackClientHandler, intent_classifier: IntentClassifier):
+    def __init__(self, event_queue: Queue, event_scheduler: EventScheduler, socket_server: WebSocketServer,
+                 slack_client: SlackClientHandler, intent_classifier: IntentClassifier,
+                 spotify_client: SpotifyClientWrapper):
         super().__init__()
         self.event_queue = event_queue
         self.event_scheduler = event_scheduler
@@ -42,6 +45,7 @@ class Iva(Thread):
         self.intent_classifier = intent_classifier
         self.tts_client = TextToSpeechClient(self.event_scheduler)
         self.config = IvaConfig()
+        self.spotify_client = spotify_client
 
         self.dispatcher = {
             StartRoutineEvent: self.__handle_start_routine_event,
@@ -55,6 +59,7 @@ class Iva(Thread):
             RefreshFrontendComponentEvent: self.__handle_refresh_frontend_component_event,
             RefreshDayDataEvent: self.__handle_refresh_day_data_event,
             UtteranceIntentEvent: self.__handle_utterance_intent_event,
+            SpotifyEvent: self.__handle_spotify_event,
         }
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
@@ -130,4 +135,8 @@ class Iva(Thread):
 
     def __handle_refresh_day_data_event(self, event: RefreshDayDataEvent):
         handler = RefreshDayDataEventHandler(event, self.event_scheduler)
+        handler.start()
+
+    def __handle_spotify_event(self, event: SpotifyEvent):
+        handler = SpotifyEventHandler(event, self.spotify_client)
         handler.start()

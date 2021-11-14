@@ -18,6 +18,7 @@ requests = "*"
 flask = "*"
 flask_restful = "*"
 pytz = "*"
+spotify = {git = "https://github.com/mental32/spotify.py"}
 
 [requires]
 python_version = "3.8"

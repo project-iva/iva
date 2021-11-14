@@ -2,7 +2,7 @@ from datetime import datetime
 from threading import Thread
 
 from event_scheduler import EventScheduler
-from events.events import UtteranceIntentEvent, RaspberryEvent
+from events.events import UtteranceIntentEvent, RaspberryEvent, SpotifyEvent
 from raspberry_client.client import RaspberryClient
 
 
@@ -43,7 +43,7 @@ class UtteranceIntentEventHandler(Thread):
         self.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_OFF))
 
     def __handle_spotify_play_intent(self):
-        print('Spotify play intent')
+        self.event_scheduler.schedule_event(SpotifyEvent(SpotifyEvent.Action.PLAY))
 
     def __handle_spotify_stop_intent(self):
-        print('Spotify stop intent')
+        self.event_scheduler.schedule_event(SpotifyEvent(SpotifyEvent.Action.STOP))

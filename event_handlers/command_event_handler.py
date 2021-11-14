@@ -1,9 +1,8 @@
 from __future__ import annotations
 from threading import Thread
 from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, RoutineType, RaspberryEvent, \
-    RefreshFrontendComponentEvent
+    RefreshFrontendComponentEvent, SpotifyEvent
 from raspberry_client.client import RaspberryClient
-from tts_client.tts_client import TextToSpeechClient
 
 
 class CommandEventHandler(Thread):
@@ -18,7 +17,9 @@ class CommandEventHandler(Thread):
             'choose_meal': self.__handle_choose_meal_command,
             'refresh_component': self.__handle_refresh_component_command,
             'say': self.__handle_say_command,
-            'toggle_intent_confirmation': self.__toggle_ask_user_to_confirm_intent_prediction_config_flag
+            'toggle_intent_confirmation': self.__toggle_ask_user_to_confirm_intent_prediction_config_flag,
+            'spotify_play': self.__handle_spotify_play,
+            'spotify_stop': self.__handle_spotify_stop,
         }
 
     def run(self):
@@ -53,3 +54,9 @@ class CommandEventHandler(Thread):
 
     def __toggle_ask_user_to_confirm_intent_prediction_config_flag(self):
         self.iva.config.ask_user_to_confirm_intent_prediction = not self.iva.config.ask_user_to_confirm_intent_prediction
+
+    def __handle_spotify_play(self):
+        self.iva.event_scheduler.schedule_event(SpotifyEvent(SpotifyEvent.Action.PLAY))
+
+    def __handle_spotify_stop(self):
+        self.iva.event_scheduler.schedule_event(SpotifyEvent(SpotifyEvent.Action.STOP))
