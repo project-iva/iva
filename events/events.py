@@ -112,6 +112,7 @@ class UtteranceIntentEvent(Event):
         TELL_TIME = 'tell_time'
         SPOTIFY_PLAY = 'spotify_play'
         SPOTIFY_STOP = 'spotify_stop'
+        TELL_JOKE = 'tell_joke'
 
     intent: Intent
     output_provider: Optional[OutputProvider]

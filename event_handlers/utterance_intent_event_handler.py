@@ -18,6 +18,7 @@ class UtteranceIntentEventHandler(Thread):
             UtteranceIntentEvent.Intent.TELL_TIME: self.__handle_tell_time_intent,
             UtteranceIntentEvent.Intent.SPOTIFY_PLAY: self.__handle_spotify_play_intent,
             UtteranceIntentEvent.Intent.SPOTIFY_STOP: self.__handle_spotify_stop_intent,
+            UtteranceIntentEvent.Intent.TELL_JOKE: self.__handle_tell_joke_intent,
         }
 
     def run(self):
@@ -47,3 +48,7 @@ class UtteranceIntentEventHandler(Thread):
 
     def __handle_spotify_stop_intent(self):
         self.event_scheduler.schedule_event(SpotifyEvent(SpotifyEvent.Action.STOP))
+
+    def __handle_tell_joke_intent(self):
+        if self.event.output_provider:
+            self.event.output_provider.output('Joke')
