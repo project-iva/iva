@@ -24,7 +24,7 @@ class ChooseMealEventHandler(Thread):
 
             control_session_event_queue = Queue(1)
             possible_meals = BackendClient.get_possible_meals()
-            presenter_session = self.get_presenter_session(possible_meals)
+            presenter_session = self.__get_presenter_session(possible_meals)
             control_session = PresenterControlSession(presenter_session, control_session_event_queue,
                                                       self.iva.socket_server)
             session_uuid = self.iva.register_control_session(control_session)
@@ -38,11 +38,11 @@ class ChooseMealEventHandler(Thread):
             chosen_meal_id = possible_meals[choice].id
             BackendClient.post_chosen_meal(chosen_meal_id)
 
-    def get_presenter_session(self, possible_meals: List[Meal]) -> PresenterSession:
-        items = self.get_meal_items(possible_meals)
+    def __get_presenter_session(self, possible_meals: List[Meal]) -> PresenterSession:
+        items = self.__get_meal_items(possible_meals)
         return PresenterSession(PresenterSessionType.MEAL_CHOICES, items)
 
-    def get_meal_items(self, possible_meals: List[Meal]) -> List[PresenterItem]:
+    def __get_meal_items(self, possible_meals: List[Meal]) -> List[PresenterItem]:
         presenter_items = []
         last_meal_index = len(possible_meals) - 1
         for index, meal in enumerate(possible_meals):
