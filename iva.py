@@ -47,6 +47,26 @@ class Iva(Thread):
         self.config = IvaConfig()
         self.spotify_client = spotify_client
 
+        self.backend_data_updated_event_queue = Queue()
+        self.choose_meal_event_queue = Queue()
+        self.command_event_queue = Queue()
+
+        self.queue_dispatcher = {
+            StartRoutineEvent: self.__handle_start_routine_event,
+            CommandEvent: self.command_event_queue,
+            UtteranceEvent: self.__handle_utterance_event,
+            RaspberryEvent: self.__handle_raspberry_event,
+            ChooseMealEvent: self.choose_meal_event_queue,
+            ScheduleDayPlanEvent: self.__handle_schedule_day_plan_event,
+            DayPlanActivityEvent: self.__handle_day_plan_activity_event,
+            BackendDataUpdatedEvent: self.backend_data_updated_event_queue,
+            RefreshFrontendComponentEvent: self.__handle_refresh_frontend_component_event,
+            RefreshDayDataEvent: self.__handle_refresh_day_data_event,
+            UtteranceIntentEvent: self.__handle_utterance_intent_event,
+            SpotifyEvent: self.__handle_spotify_event,
+        }
+        self.__start_handlers()
+
         self.dispatcher = {
             StartRoutineEvent: self.__handle_start_routine_event,
             CommandEvent: self.__handle_command_event,
@@ -61,6 +81,11 @@ class Iva(Thread):
             UtteranceIntentEvent: self.__handle_utterance_intent_event,
             SpotifyEvent: self.__handle_spotify_event,
         }
+
+    def __start_handlers(self):
+        BackendDataUpdatedEventHandler(self.backend_data_updated_event_queue, self).start()
+        ChooseMealEventHandler(self.choose_meal_event_queue, self).start()
+        CommandEventHandler(self.command_event_queue, self).start()
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
         session_uuid = uuid.uuid4()

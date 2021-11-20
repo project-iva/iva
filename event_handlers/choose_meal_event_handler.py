@@ -12,28 +12,31 @@ from events.events import ChooseMealEvent
 
 
 class ChooseMealEventHandler(Thread):
-    def __init__(self, choose_meal_event: ChooseMealEvent, iva: Iva):
+    def __init__(self, event_queue: Queue, iva: Iva):
         super().__init__()
-        self.choose_meal_event = choose_meal_event
+        self.event_queue = event_queue
         self.iva = iva
-        self.event_queue = Queue(1)
 
     def run(self):
-        print(f'Handling {self.choose_meal_event}')
+        while True:
+            event: ChooseMealEvent = self.event_queue.get()
+            print(f'Handling {event}')
 
-        possible_meals = BackendClient.get_possible_meals()
-        presenter_session = self.get_presenter_session(possible_meals)
-        control_session = PresenterControlSession(presenter_session, self.event_queue, self.iva.socket_server)
-        session_uuid = self.iva.register_control_session(control_session)
-        control_session.handle_action(ControlSessionAction.START_PRESENTING)
+            control_session_event_queue = Queue(1)
+            possible_meals = BackendClient.get_possible_meals()
+            presenter_session = self.get_presenter_session(possible_meals)
+            control_session = PresenterControlSession(presenter_session, control_session_event_queue,
+                                                      self.iva.socket_server)
+            session_uuid = self.iva.register_control_session(control_session)
+            control_session.handle_action(ControlSessionAction.START_PRESENTING)
 
-        choice = self.event_queue.get()
-        self.event_queue.task_done()
-        self.iva.unregister_control_session(session_uuid)
+            choice = control_session_event_queue.get()
+            control_session_event_queue.task_done()
+            self.iva.unregister_control_session(session_uuid)
 
-        # store the choice in the backend
-        chosen_meal_id = possible_meals[choice].id
-        BackendClient.post_chosen_meal(chosen_meal_id)
+            # store the choice in the backend
+            chosen_meal_id = possible_meals[choice].id
+            BackendClient.post_chosen_meal(chosen_meal_id)
 
     def get_presenter_session(self, possible_meals: List[Meal]) -> PresenterSession:
         items = self.get_meal_items(possible_meals)
