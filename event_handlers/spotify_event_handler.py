@@ -1,7 +1,7 @@
 from threading import Thread
 
 from events.events import SpotifyEvent
-from spotify_wrapper.spotify_client_wrapper import SpotifyClientWrapper
+from intent_helpers.spotify_client_wrapper import SpotifyClientWrapper
 
 
 class SpotifyEventHandler(Thread):

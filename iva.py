@@ -27,7 +27,7 @@ from interactions.input_provider import InputProvider
 from interactions.output_provider import OutputProvider
 from iva_config import IvaConfig
 from slack_client.handler import SlackClientHandler
-from spotify_wrapper.spotify_client_wrapper import SpotifyClientWrapper
+from intent_helpers.spotify_client_wrapper import SpotifyClientWrapper
 from tts_client.tts_client import TextToSpeechClient
 from websocket.server import WebSocketServer
 
