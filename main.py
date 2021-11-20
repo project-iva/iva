@@ -10,7 +10,7 @@ from http_server.server import app as flask_app
 from intent_classifier.classifier import IntentClassifier
 from iva import Iva
 from slack_client.handler import SlackClientHandler
-from intent_helpers.spotify_wrapper import SpotifyClientWrapper
+from intent_helpers.spotify_client_wrapper import SpotifyClientWrapper
 from websocket.server import WebSocketServer
 
 
