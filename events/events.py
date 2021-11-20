@@ -106,13 +106,13 @@ class UtteranceEvent(Event):
 @dataclass
 class UtteranceIntentEvent(Event):
     class Intent(str, Enum):
-        TURN_SCREEN_ON = 'turn_screen_on'
-        TURN_SCREEN_OFF = 'turn_screen_off'
-        INTRODUCE_YOURSELF = 'introduce_yourself'
-        TELL_TIME = 'tell_time'
-        SPOTIFY_PLAY = 'spotify_play'
-        SPOTIFY_STOP = 'spotify_stop'
-        TELL_JOKE = 'tell_joke'
+        TURN_SCREEN_ON = 'TURN_SCREEN_ON'
+        TURN_SCREEN_OFF = 'TURN_SCREEN_OFF'
+        INTRODUCE_YOURSELF = 'INTRODUCE_YOURSELF'
+        TELL_TIME = 'TELL_TIME'
+        SPOTIFY_PLAY = 'SPOTIFY_PLAY'
+        SPOTIFY_STOP = 'SPOTIFY_STOP'
+        TELL_JOKE = 'TELL_JOKE'
 
     intent: Intent
     output_provider: Optional[OutputProvider]

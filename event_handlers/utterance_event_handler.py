@@ -81,7 +81,7 @@ class UtteranceEventHandler(Thread):
     def handle_intent(self, intent: str):
         try:
             # Try to convert to an utterance intent
-            utterance_intent = UtteranceIntentEvent.Intent(intent)
+            utterance_intent = UtteranceIntentEvent.Intent(intent.upper())
         except ValueError:
             print(f'Unknown intent {intent}')
             return
