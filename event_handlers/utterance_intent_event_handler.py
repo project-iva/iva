@@ -3,6 +3,7 @@ from threading import Thread
 
 from event_scheduler import EventScheduler
 from events.events import UtteranceIntentEvent, RaspberryEvent, SpotifyEvent
+from intent_helpers.jokes_api_wrapper import JokesAPIWrapper
 from raspberry_client.client import RaspberryClient
 
 
@@ -51,4 +52,7 @@ class UtteranceIntentEventHandler(Thread):
 
     def __handle_tell_joke_intent(self):
         if self.event.output_provider:
-            self.event.output_provider.output('Joke')
+            joke = JokesAPIWrapper.fetch_joke()
+            # remove new line symbols in the text
+            joke_text = joke.joke.replace('\n', '')
+            self.event.output_provider.output(joke_text)
