@@ -1,41 +1,35 @@
-from __future__ import annotations
+from queue import Queue
 from threading import Thread
+
+from event_scheduler import EventScheduler
 from events.events import BackendDataUpdatedEvent, RefreshFrontendComponentEvent
 
 
 class BackendDataUpdatedEventHandler(Thread):
-    def __init__(self, data_updated_event: BackendDataUpdatedEvent, iva: Iva):
+    """
+    Handles data updated events from the backend and signals frontend to refresh corresponding components
+    """
+
+    def __init__(self, event_queue: Queue, event_scheduler: EventScheduler):
         super().__init__()
-        self.data_updated_event = data_updated_event
-        self.iva = iva
-        self.dispatcher = {
-            BackendDataUpdatedEvent.DataType.CALORIES: self.__handle_calories_data_updated,
-            BackendDataUpdatedEvent.DataType.BODY_MASS: self.__handle_body_mass_data_updated,
-            BackendDataUpdatedEvent.DataType.DAY_PLAN: self.__handle_day_plan_data_updated,
-            BackendDataUpdatedEvent.DataType.DAY_GOALS: self.__handle_day_goals_data_updated,
-            BackendDataUpdatedEvent.DataType.SLEEP: self.__handle_sleep_data_updated,
-            BackendDataUpdatedEvent.DataType.MINDFUL_SESSIONS: self.__handle_mindful_sessions_data_updated,
+        self.event_queue = event_queue
+        self.event_scheduler = event_scheduler
+        self.event_component_mapping = {
+            BackendDataUpdatedEvent.DataType.CALORIES: RefreshFrontendComponentEvent.Component.CALORIES_VIEW,
+            BackendDataUpdatedEvent.DataType.BODY_MASS: RefreshFrontendComponentEvent.Component.BODY_MASS_VIEW,
+            BackendDataUpdatedEvent.DataType.DAY_PLAN: RefreshFrontendComponentEvent.Component.DAY_PLAN_VIEW,
+            BackendDataUpdatedEvent.DataType.DAY_GOALS: RefreshFrontendComponentEvent.Component.DAY_GOALS_VIEW,
+            BackendDataUpdatedEvent.DataType.SLEEP: RefreshFrontendComponentEvent.Component.SLEEP_STATS_VIEW,
+            BackendDataUpdatedEvent.DataType.MINDFUL_SESSIONS: RefreshFrontendComponentEvent.Component.MINDFUL_SESSIONS_STATS_VIEW,
         }
 
     def run(self):
-        print(f'Handling {self.data_updated_event}')
-        self.dispatcher[self.data_updated_event.data_type]()
-
-    def __handle_calories_data_updated(self):
-        self.iva.event_scheduler.schedule_event(RefreshFrontendComponentEvent(RefreshFrontendComponentEvent.Component.CALORIES_VIEW))
-
-    def __handle_body_mass_data_updated(self):
-        self.iva.event_scheduler.schedule_event(RefreshFrontendComponentEvent(RefreshFrontendComponentEvent.Component.BODY_MASS_VIEW))
-
-    def __handle_day_plan_data_updated(self):
-        self.iva.event_scheduler.schedule_event(RefreshFrontendComponentEvent(RefreshFrontendComponentEvent.Component.DAY_PLAN_VIEW))
-        self.iva.refresh_day_plan()
-
-    def __handle_day_goals_data_updated(self):
-        self.iva.event_scheduler.schedule_event(RefreshFrontendComponentEvent(RefreshFrontendComponentEvent.Component.DAY_GOALS_VIEW))
-
-    def __handle_sleep_data_updated(self):
-        self.iva.event_scheduler.schedule_event(RefreshFrontendComponentEvent(RefreshFrontendComponentEvent.Component.SLEEP_STATS_VIEW))
-
-    def __handle_mindful_sessions_data_updated(self):
-        self.iva.event_scheduler.schedule_event(RefreshFrontendComponentEvent(RefreshFrontendComponentEvent.Component.MINDFUL_SESSIONS_STATS_VIEW))
+        while True:
+            event: BackendDataUpdatedEvent = self.event_queue.get()
+            print(f'Handling {event}')
+            try:
+                component = self.event_component_mapping[event.data_type]
+            except KeyError:
+                print(f'Unknown component mapping for {event.data_type}')
+            else:
+                self.event_scheduler.schedule_event(RefreshFrontendComponentEvent(component))

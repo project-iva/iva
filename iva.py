@@ -47,20 +47,49 @@ class Iva(Thread):
         self.config = IvaConfig()
         self.spotify_client = spotify_client
 
-        self.dispatcher = {
-            StartRoutineEvent: self.__handle_start_routine_event,
-            CommandEvent: self.__handle_command_event,
-            UtteranceEvent: self.__handle_utterance_event,
-            RaspberryEvent: self.__handle_raspberry_event,
-            ChooseMealEvent: self.__handle_choose_meal_event,
-            ScheduleDayPlanEvent: self.__handle_schedule_day_plan_event,
-            DayPlanActivityEvent: self.__handle_day_plan_activity_event,
-            BackendDataUpdatedEvent: self.__handle_backend_data_updated_event,
-            RefreshFrontendComponentEvent: self.__handle_refresh_frontend_component_event,
-            RefreshDayDataEvent: self.__handle_refresh_day_data_event,
-            UtteranceIntentEvent: self.__handle_utterance_intent_event,
-            SpotifyEvent: self.__handle_spotify_event,
+        # event handlers queues
+        self.backend_data_updated_event_queue = Queue()
+        self.choose_meal_event_queue = Queue()
+        self.command_event_queue = Queue()
+        self.day_plan_activity_event_queue = Queue()
+        self.raspberry_event_queue = Queue()
+        self.refresh_day_data_event_queue = Queue()
+        self.refresh_frontend_component_event_queue = Queue()
+        self.schedule_day_plan_event_queue = Queue()
+        self.spotify_event_queue = Queue()
+        self.start_routine_event_queue = Queue()
+        self.utterance_event_queue = Queue()
+        self.utterance_intent_event_queue = Queue()
+
+        self.queue_dispatcher = {
+            StartRoutineEvent: self.start_routine_event_queue,
+            CommandEvent: self.command_event_queue,
+            UtteranceEvent: self.utterance_event_queue,
+            RaspberryEvent: self.raspberry_event_queue,
+            ChooseMealEvent: self.choose_meal_event_queue,
+            ScheduleDayPlanEvent: self.schedule_day_plan_event_queue,
+            DayPlanActivityEvent: self.day_plan_activity_event_queue,
+            BackendDataUpdatedEvent: self.backend_data_updated_event_queue,
+            RefreshFrontendComponentEvent: self.refresh_frontend_component_event_queue,
+            RefreshDayDataEvent: self.refresh_day_data_event_queue,
+            UtteranceIntentEvent: self.utterance_intent_event_queue,
+            SpotifyEvent: self.spotify_event_queue,
         }
+        self.__start_handlers()
+
+    def __start_handlers(self):
+        BackendDataUpdatedEventHandler(self.backend_data_updated_event_queue, self.event_scheduler).start()
+        ChooseMealEventHandler(self.choose_meal_event_queue, self).start()
+        CommandEventHandler(self.command_event_queue, self).start()
+        DayPlanActivityEventHandler(self.day_plan_activity_event_queue, self.event_scheduler).start()
+        RaspberryEventHandler(self.raspberry_event_queue).start()
+        RefreshDayDataEventHandler(self.refresh_day_data_event_queue, self.event_scheduler).start()
+        RefreshFrontendComponentEventHandler(self.refresh_frontend_component_event_queue, self.socket_server).start()
+        ScheduleDayPlanEventHandler(self.schedule_day_plan_event_queue, self.event_scheduler).start()
+        SpotifyEventHandler(self.spotify_event_queue, self.spotify_client).start()
+        StartRoutineEventHandler(self.start_routine_event_queue, self).start()
+        UtteranceEventHandler(self.utterance_event_queue, self.intent_classifier, self).start()
+        UtteranceIntentEventHandler(self.utterance_intent_event_queue, self.event_scheduler).start()
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
         session_uuid = uuid.uuid4()
@@ -89,54 +118,9 @@ class Iva(Thread):
     def run(self):
         while True:
             event = self.event_queue.get()
-            self.dispatcher[type(event)](event)
-            self.event_queue.task_done()
-
-    def __handle_start_routine_event(self, start_routine_event: StartRoutineEvent):
-        handler = StartRoutineEventHandler(start_routine_event, self)
-        handler.start()
-
-    def __handle_command_event(self, command_event: CommandEvent):
-        handler = CommandEventHandler(command_event, self)
-        handler.start()
-
-    def __handle_utterance_event(self, utterance_event: UtteranceEvent):
-        handler = UtteranceEventHandler(utterance_event, self.intent_classifier, self)
-        handler.start()
-
-    def __handle_utterance_intent_event(self, event: UtteranceIntentEvent):
-        handler = UtteranceIntentEventHandler(event, self.event_scheduler)
-        handler.start()
-
-    def __handle_raspberry_event(self, raspberry_event: RaspberryEvent):
-        handler = RaspberryEventHandler(raspberry_event)
-        handler.start()
-
-    def __handle_choose_meal_event(self, choose_meal_event: ChooseMealEvent):
-        handler = ChooseMealEventHandler(choose_meal_event, self)
-        handler.start()
-
-    def __handle_schedule_day_plan_event(self, schedule_day_plan_event: ScheduleDayPlanEvent):
-        handler = ScheduleDayPlanEventHandler(schedule_day_plan_event, self.event_scheduler)
-        handler.start()
-
-    def __handle_day_plan_activity_event(self, day_plan_activity_event: DayPlanActivityEvent):
-        handler = DayPlanActivityEventHandler(day_plan_activity_event, self.event_scheduler)
-        handler.start()
-
-    def __handle_backend_data_updated_event(self, data_updated_event: BackendDataUpdatedEvent):
-        handler = BackendDataUpdatedEventHandler(data_updated_event, self)
-        handler.start()
-
-    def __handle_refresh_frontend_component_event(self,
-                                                  refresh_frontend_component_event: RefreshFrontendComponentEvent):
-        handler = RefreshFrontendComponentEventHandler(refresh_frontend_component_event, self)
-        handler.start()
-
-    def __handle_refresh_day_data_event(self, event: RefreshDayDataEvent):
-        handler = RefreshDayDataEventHandler(event, self.event_scheduler)
-        handler.start()
-
-    def __handle_spotify_event(self, event: SpotifyEvent):
-        handler = SpotifyEventHandler(event, self.spotify_client)
-        handler.start()
+            try:
+                queue = self.queue_dispatcher[type(event)]
+            except KeyError:
+                print(f'Handler for {event} not implemented!')
+            else:
+                queue.put(event)

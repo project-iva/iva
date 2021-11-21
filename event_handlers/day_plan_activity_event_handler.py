@@ -1,3 +1,4 @@
+from queue import Queue
 from threading import Thread
 
 from event_scheduler import EventScheduler
@@ -6,26 +7,27 @@ from models.day_plan import DayPlanActivityType
 
 
 class DayPlanActivityEventHandler(Thread):
-    def __init__(self, day_plan_activity_event: DayPlanActivityEvent, event_scheduler: EventScheduler):
+    """
+    Responsible for firing up any follow up events after a specific day plan activity has started
+    """
+
+    def __init__(self, event_queue: Queue, event_scheduler: EventScheduler):
         super().__init__()
-        self.day_plan_activity_event = day_plan_activity_event
+        self.event_queue = event_queue
         self.event_scheduler = event_scheduler
-        self.dispatcher = {
-            DayPlanActivityType.MORNING_ROUTINE: self.__handle_morning_routine_activity,
-            DayPlanActivityType.EVENING_ROUTINE: self.__handle_evening_routine_activity,
-            DayPlanActivityType.MEAL: self.__handle_meal_activity,
+        self.activity_event_mapping = {
+            DayPlanActivityType.MORNING_ROUTINE: StartRoutineEvent(RoutineType.MORNING),
+            DayPlanActivityType.EVENING_ROUTINE: StartRoutineEvent(RoutineType.EVENING),
+            DayPlanActivityType.MEAL: ChooseMealEvent(),
         }
 
     def run(self):
-        print(f'Handling {self.day_plan_activity_event}')
-        if dispatch := self.dispatcher.get(self.day_plan_activity_event.activity.type):
-            dispatch()
-
-    def __handle_morning_routine_activity(self):
-        self.event_scheduler.schedule_event(StartRoutineEvent(RoutineType.MORNING))
-
-    def __handle_evening_routine_activity(self):
-        self.event_scheduler.schedule_event(StartRoutineEvent(RoutineType.EVENING))
-
-    def __handle_meal_activity(self):
-        self.event_scheduler.schedule_event(ChooseMealEvent())
+        while True:
+            event: DayPlanActivityEvent = self.event_queue.get()
+            print(f'Handling {event}')
+            try:
+                follow_up_event = self.activity_event_mapping[event.activity.type]
+            except KeyError:
+                pass
+            else:
+                self.event_scheduler.schedule_event(follow_up_event)

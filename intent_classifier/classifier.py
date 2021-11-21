@@ -21,7 +21,7 @@ class IntentClassifier(Thread):
             result_queue.put(classification_result)
             self.classification_requests.task_done()
 
-    def request_classification(self, utterance: str):
+    def request_classification(self, utterance: str) -> Queue:
         result_queue = Queue()
         self.classification_requests.put((utterance, result_queue))
         return result_queue

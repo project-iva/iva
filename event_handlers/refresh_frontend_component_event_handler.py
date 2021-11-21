@@ -1,18 +1,26 @@
 from __future__ import annotations
+
+from queue import Queue
 from threading import Thread
 from events.events import RefreshFrontendComponentEvent
 from websocket.message import FrontendWebSocketMessage, FrontendWebSocketMessageAction
-from websocket.server import WebSocketClientType
+from websocket.server import WebSocketClientType, WebSocketServer
 
 
 class RefreshFrontendComponentEventHandler(Thread):
-    def __init__(self, refresh_frontend_component_event: RefreshFrontendComponentEvent, iva: Iva):
+    """
+    Sends socket message to the frontend, notifying it about which component needs to be refreshed
+    """
+
+    def __init__(self, event_queue: Queue, websocket_server: WebSocketServer):
         super().__init__()
-        self.refresh_frontend_component_event = refresh_frontend_component_event
-        self.iva = iva
+        self.event_queue = event_queue
+        self.websocket_server = websocket_server
 
     def run(self):
-        print(f'Handling {self.refresh_frontend_component_event}')
-        data = {'component_identifier': self.refresh_frontend_component_event.component}
-        message = FrontendWebSocketMessage(action=FrontendWebSocketMessageAction.REFRESH_COMPONENT, data=data)
-        self.iva.socket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
+        while True:
+            event: RefreshFrontendComponentEvent = self.event_queue.get()
+            print(f'Handling {event}')
+            data = {'component_identifier': event.component}
+            message = FrontendWebSocketMessage(action=FrontendWebSocketMessageAction.REFRESH_COMPONENT, data=data)
+            self.websocket_server.send_message(message, [WebSocketClientType.WEB_INTERFACE])
