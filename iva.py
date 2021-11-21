@@ -83,7 +83,7 @@ class Iva(Thread):
         }
 
     def __start_handlers(self):
-        BackendDataUpdatedEventHandler(self.backend_data_updated_event_queue, self).start()
+        BackendDataUpdatedEventHandler(self.backend_data_updated_event_queue, self.event_scheduler).start()
         ChooseMealEventHandler(self.choose_meal_event_queue, self).start()
         CommandEventHandler(self.command_event_queue, self).start()
 
