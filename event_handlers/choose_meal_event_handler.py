@@ -12,6 +12,10 @@ from events.events import ChooseMealEvent
 
 
 class ChooseMealEventHandler(Thread):
+    """
+    Handles choose meal event by showing menu in the frontend and creating a control session to handle user input
+    """
+
     def __init__(self, event_queue: Queue, iva: Iva):
         super().__init__()
         self.event_queue = event_queue

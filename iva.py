@@ -50,15 +50,17 @@ class Iva(Thread):
         self.backend_data_updated_event_queue = Queue()
         self.choose_meal_event_queue = Queue()
         self.command_event_queue = Queue()
+        self.day_plan_activity_event_queue = Queue()
+        self.raspberry_event_queue = Queue()
 
         self.queue_dispatcher = {
             StartRoutineEvent: self.__handle_start_routine_event,
             CommandEvent: self.command_event_queue,
             UtteranceEvent: self.__handle_utterance_event,
-            RaspberryEvent: self.__handle_raspberry_event,
+            RaspberryEvent: self.raspberry_event_queue,
             ChooseMealEvent: self.choose_meal_event_queue,
             ScheduleDayPlanEvent: self.__handle_schedule_day_plan_event,
-            DayPlanActivityEvent: self.__handle_day_plan_activity_event,
+            DayPlanActivityEvent: self.day_plan_activity_event_queue,
             BackendDataUpdatedEvent: self.backend_data_updated_event_queue,
             RefreshFrontendComponentEvent: self.__handle_refresh_frontend_component_event,
             RefreshDayDataEvent: self.__handle_refresh_day_data_event,
@@ -86,6 +88,8 @@ class Iva(Thread):
         BackendDataUpdatedEventHandler(self.backend_data_updated_event_queue, self.event_scheduler).start()
         ChooseMealEventHandler(self.choose_meal_event_queue, self).start()
         CommandEventHandler(self.command_event_queue, self).start()
+        DayPlanActivityEventHandler(self.day_plan_activity_event_queue, self.event_scheduler).start()
+        RaspberryEventHandler(self.raspberry_event_queue).start()
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
         session_uuid = uuid.uuid4()

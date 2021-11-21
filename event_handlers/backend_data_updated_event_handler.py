@@ -27,5 +27,9 @@ class BackendDataUpdatedEventHandler(Thread):
         while True:
             event: BackendDataUpdatedEvent = self.event_queue.get()
             print(f'Handling {event}')
-            component = self.event_component_mapping[event.data_type]
-            self.event_scheduler.schedule_event(RefreshFrontendComponentEvent(component))
+            try:
+                component = self.event_component_mapping[event.data_type]
+            except KeyError:
+                print(f'Unknown component mapping for {event.data_type}')
+            else:
+                self.event_scheduler.schedule_event(RefreshFrontendComponentEvent(component))

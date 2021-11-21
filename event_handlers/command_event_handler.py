@@ -8,6 +8,10 @@ from raspberry_client.client import RaspberryClient
 
 
 class CommandEventHandler(Thread):
+    """
+    Handles pre-defined user commands
+    """
+
     def __init__(self, event_queue: Queue, iva: Iva):
         super().__init__()
         self.event_queue = event_queue
