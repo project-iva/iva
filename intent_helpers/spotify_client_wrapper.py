@@ -31,7 +31,6 @@ class SpotifyClientWrapper:
     def play(self):
         # refresh device status
         self.target_device = self.get_target_device(self.target_device.name)
-        task = None
         if self.target_device.is_active:
             # play
             task = self.http_client.play_playback(None, device_id=self.target_device.id)

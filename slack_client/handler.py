@@ -53,7 +53,6 @@ class SlackClientHandler(Thread, InputProvider, OutputProvider):
         # ignore bot messages
         if data.get('subtype') == 'bot_message':
             return
-        web_client = payload['web_client']
         text = data['text']
 
         # if the text starts with # then it should be a predefined command
@@ -64,9 +63,11 @@ class SlackClientHandler(Thread, InputProvider, OutputProvider):
             args = command_and_args[1:]
             self.event_scheduler.schedule_event(CommandEvent(command=command_and_args[0], args=args))
         else:
+            # if there is an active session expecting an utterance, forward it
             if self.active_session:
                 self.active_session.add_new_utterance(text)
             else:
+                # otherwise the utterance should be handled via an event
                 self.event_scheduler.schedule_event(
                     UtteranceEvent(utterance=text, input_provider=self, output_provider=self)
                 )
