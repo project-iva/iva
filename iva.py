@@ -5,18 +5,7 @@ from typing import Dict, Optional
 from uuid import UUID
 
 from control_session.session import PresenterControlSession
-from event_handlers.backend_data_updated_event_handler import BackendDataUpdatedEventHandler
-from event_handlers.choose_meal_event_handler import ChooseMealEventHandler
-from event_handlers.command_event_handler import CommandEventHandler
-from event_handlers.day_plan_activity_event_handler import DayPlanActivityEventHandler
-from event_handlers.raspberry_event_handler import RaspberryEventHandler
-from event_handlers.refresh_day_data_event_handler import RefreshDayDataEventHandler
-from event_handlers.refresh_frontend_component_event_handler import RefreshFrontendComponentEventHandler
-from event_handlers.schedule_day_plan_event_handler import ScheduleDayPlanEventHandler
-from event_handlers.spotify_event_handler import SpotifyEventHandler
-from event_handlers.start_routine_event_handler import StartRoutineEventHandler
-from event_handlers.utterance_event_handler import UtteranceEventHandler
-from event_handlers.utterance_intent_event_handler import UtteranceIntentEventHandler
+from event_handlers import *
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, ChooseMealEvent, \

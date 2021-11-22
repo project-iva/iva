@@ -1,9 +1,10 @@
-from flask import Flask, Response
-from flask_restful import Resource, Api, reqparse, abort
 from uuid import UUID
 
+from flask import Flask, Response
+from flask_restful import Resource, Api, reqparse, abort
+
 from control_session.session import PresenterControlSession, ControlSessionAction, InvalidControlSessionActionException
-from events.events import BackendDataUpdatedEvent, UtteranceEvent
+from events.events import BackendDataUpdatedEvent
 from raspberry_client.client import RaspberryClient
 
 app = Flask(__name__)

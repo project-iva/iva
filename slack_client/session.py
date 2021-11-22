@@ -2,6 +2,10 @@ from queue import Queue
 
 
 class SlackSession:
+    """
+    Keeps track of utterances while this session is active
+    """
+
     def __init__(self):
         self.utterances = []
         self.queue = Queue()
