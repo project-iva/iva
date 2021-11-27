@@ -32,9 +32,10 @@ class UtteranceEventHandler(Thread):
             sorted_intent_prediction = sorted(intent_prediction.items(), key=lambda item: item[1], reverse=True)
 
             # TODO: handle case if there are on intents available
-            intent, _ = sorted_intent_prediction[0]
+            intent, confidence = sorted_intent_prediction[0]
 
-            if self.iva.config.ask_user_to_confirm_intent_prediction:
+            if self.iva.config.ask_user_to_confirm_intent_prediction \
+                    and confidence < self.iva.config.ask_user_to_confirm_intent_prediction_for_confidence_lower_than:
                 confirmed_intent = self.__confirm_intent_prediction(event, sorted_intent_prediction)
                 if confirmed_intent:
                     intent = confirmed_intent

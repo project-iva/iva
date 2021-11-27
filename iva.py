@@ -33,7 +33,7 @@ class Iva(Thread):
         self.control_sessions: Dict[UUID, PresenterControlSession] = {}
         self.intent_classifier = intent_classifier
         self.tts_client = TextToSpeechClient(self.event_scheduler)
-        self.config = IvaConfig()
+        self.config = IvaConfig(ask_user_to_confirm_intent_prediction_for_confidence_lower_than=0.7)
         self.spotify_client = spotify_client
 
         # event handlers queues
