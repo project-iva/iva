@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 from queue import Queue
 from threading import Thread
 from typing import List
 
 from control_session.session import PresenterSession, PresenterItem, PresenterSessionType, PresenterControlSession, \
     ControlSessionAction
-from events.events import StartRoutineEvent, RoutineType, RaspberryEvent
+from events.events import StartRoutineEvent, RaspberryEvent
 from models.routine import RoutineStep
 from raspberry_client.client import RaspberryClient
 
@@ -47,9 +48,9 @@ class StartRoutineEventHandler(Thread):
         self.iva.event_scheduler.schedule_event(RaspberryEvent(RaspberryClient.Action.SCREEN_OFF))
 
     def __get_presenter_session(self, event: StartRoutineEvent) -> PresenterSession:
-        if event.type == RoutineType.MORNING:
+        if event.type == StartRoutineEvent.Type.MORNING:
             items = self.__get_morning_routine_items()
-        elif event.type == RoutineType.EVENING:
+        elif event.type == StartRoutineEvent.Type.EVENING:
             items = self.__get_evening_routine_items()
         else:
             raise Exception(f'Unknown routine type {event.type}')
