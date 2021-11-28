@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from queue import Queue
 from threading import Thread
-from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, RoutineType, RaspberryEvent, \
+
+from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, RaspberryEvent, \
     RefreshFrontendComponentEvent, SpotifyEvent
 from raspberry_client.client import RaspberryClient
 
@@ -39,7 +40,7 @@ class CommandEventHandler(Thread):
 
     def __handle_start_routine_command(self, event: CommandEvent):
         # TODO: handle a missing parameter
-        routine_type = RoutineType(event.args[0])
+        routine_type = StartRoutineEvent.Type(event.args[0])
         self.iva.event_scheduler.schedule_event(StartRoutineEvent(routine_type))
 
     def __handle_turn_screen_on_command(self, _event: CommandEvent):

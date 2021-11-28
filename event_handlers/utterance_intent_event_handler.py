@@ -3,7 +3,7 @@ from queue import Queue
 from threading import Thread
 
 from event_scheduler import EventScheduler
-from events.events import UtteranceIntentEvent, RaspberryEvent, SpotifyEvent
+from events.events import UtteranceIntentEvent, RaspberryEvent, SpotifyEvent, StartRoutineEvent
 from intent_helpers.jokes_api_wrapper import JokesAPIWrapper
 from raspberry_client.client import RaspberryClient
 
@@ -25,6 +25,8 @@ class UtteranceIntentEventHandler(Thread):
             UtteranceIntentEvent.Intent.SPOTIFY_PLAY: self.__handle_spotify_play_intent,
             UtteranceIntentEvent.Intent.SPOTIFY_STOP: self.__handle_spotify_stop_intent,
             UtteranceIntentEvent.Intent.TELL_JOKE: self.__handle_tell_joke_intent,
+            UtteranceIntentEvent.Intent.START_MORNING_ROUTINE: self.__handle_start_morning_routine,
+            UtteranceIntentEvent.Intent.START_EVENING_ROUTINE: self.__handle_start_evening_routine,
         }
 
     def run(self):
@@ -63,3 +65,9 @@ class UtteranceIntentEventHandler(Thread):
             # remove new line symbols in the text
             joke_text = joke.joke.replace('\n', '')
             event.output_provider.output(joke_text)
+
+    def __handle_start_morning_routine(self, _event: UtteranceIntentEvent):
+        self.event_scheduler.schedule_event(StartRoutineEvent(StartRoutineEvent.Type.MORNING))
+
+    def __handle_start_evening_routine(self, _event: UtteranceIntentEvent):
+        self.event_scheduler.schedule_event(StartRoutineEvent(StartRoutineEvent.Type.EVENING))

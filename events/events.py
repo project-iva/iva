@@ -15,14 +15,13 @@ class Event:
     pass
 
 
-class RoutineType(str, Enum):
-    MORNING = 'MORNING'
-    EVENING = 'EVENING'
-
-
 @dataclass
 class StartRoutineEvent(Event):
-    type: RoutineType
+    class Type(str, Enum):
+        MORNING = 'MORNING'
+        EVENING = 'EVENING'
+
+    type: Type
 
 
 @dataclass
@@ -113,6 +112,8 @@ class UtteranceIntentEvent(Event):
         SPOTIFY_PLAY = 'SPOTIFY_PLAY'
         SPOTIFY_STOP = 'SPOTIFY_STOP'
         TELL_JOKE = 'TELL_JOKE'
+        START_MORNING_ROUTINE = 'START_MORNING_ROUTINE'
+        START_EVENING_ROUTINE = 'START_EVENING_ROUTINE'
 
     intent: Intent
     output_provider: Optional[OutputProvider]

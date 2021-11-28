@@ -2,7 +2,7 @@ from queue import Queue
 from threading import Thread
 
 from event_scheduler import EventScheduler
-from events.events import DayPlanActivityEvent, StartRoutineEvent, RoutineType, ChooseMealEvent
+from events.events import DayPlanActivityEvent, StartRoutineEvent, ChooseMealEvent
 from models.day_plan import DayPlanActivityType
 
 
@@ -16,8 +16,8 @@ class DayPlanActivityEventHandler(Thread):
         self.event_queue = event_queue
         self.event_scheduler = event_scheduler
         self.activity_event_mapping = {
-            DayPlanActivityType.MORNING_ROUTINE: StartRoutineEvent(RoutineType.MORNING),
-            DayPlanActivityType.EVENING_ROUTINE: StartRoutineEvent(RoutineType.EVENING),
+            DayPlanActivityType.MORNING_ROUTINE: StartRoutineEvent(StartRoutineEvent.Type.MORNING),
+            DayPlanActivityType.EVENING_ROUTINE: StartRoutineEvent(StartRoutineEvent.Type.EVENING),
             DayPlanActivityType.MEAL: ChooseMealEvent(),
         }
 
