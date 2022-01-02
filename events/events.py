@@ -16,6 +16,26 @@ class Event:
 
 
 @dataclass
+class OutputProviderMixin:
+    output_provider: OutputProvider
+
+
+@dataclass
+class OptionalOutputProviderMixin:
+    output_provider: Optional[OutputProvider]
+
+
+@dataclass
+class InputProviderMixin:
+    input_provider: InputProvider
+
+
+@dataclass
+class OptionalInputProviderMixin:
+    input_provider: Optional[InputProvider]
+
+
+@dataclass
 class StartRoutineEvent(Event):
     class Type(str, Enum):
         MORNING = 'MORNING'
@@ -30,7 +50,7 @@ class MindfulSessionRecordedEvent(Event):
 
 
 @dataclass
-class CommandEvent(Event):
+class CommandEvent(OptionalOutputProviderMixin, Event):
     command: str
     args: List[str]
 
@@ -96,10 +116,8 @@ class RefreshDayDataEvent(Event):
 
 
 @dataclass
-class UtteranceEvent(Event):
+class UtteranceEvent(OptionalInputProviderMixin, OptionalOutputProviderMixin, Event):
     utterance: str
-    input_provider: Optional[InputProvider]
-    output_provider: Optional[OutputProvider]
 
 
 @dataclass
@@ -126,3 +144,13 @@ class SpotifyEvent(Event):
         STOP = auto()
 
     action: Action
+
+
+@dataclass
+class ConfigCommandEvent(OutputProviderMixin, Event):
+    class Action(str, Enum):
+        PRINT = 'PRINT'
+        SET = 'SET'
+
+    action: Action
+    args: List[str]

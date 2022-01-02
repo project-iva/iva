@@ -4,7 +4,7 @@ from queue import Queue
 from threading import Thread
 
 from events.events import CommandEvent, ChooseMealEvent, StartRoutineEvent, RaspberryEvent, \
-    RefreshFrontendComponentEvent, SpotifyEvent
+    RefreshFrontendComponentEvent, SpotifyEvent, ConfigCommandEvent
 from raspberry_client.client import RaspberryClient
 
 
@@ -27,6 +27,7 @@ class CommandEventHandler(Thread):
             'toggle_intent_confirmation': self.__toggle_ask_user_to_confirm_intent_prediction_config_flag,
             'spotify_play': self.__handle_spotify_play,
             'spotify_stop': self.__handle_spotify_stop,
+            'config': self.__handle_config_command,
         }
 
     def run(self):
@@ -69,3 +70,16 @@ class CommandEventHandler(Thread):
 
     def __handle_spotify_stop(self, _event: CommandEvent):
         self.iva.event_scheduler.schedule_event(SpotifyEvent(SpotifyEvent.Action.STOP))
+
+    def __handle_config_command(self, event: CommandEvent):
+        if not event.output_provider:
+            print('#config event requires an output provider')
+            return
+
+        try:
+            config_command = ConfigCommandEvent.Action(event.args[0].upper())
+        except ValueError:
+            event.output_provider.output(f'Unknown config command: {event.args[0]}')
+        else:
+            self.iva.event_scheduler.schedule_event(
+                ConfigCommandEvent(action=config_command, output_provider=event.output_provider, args=event.args[1:]))
