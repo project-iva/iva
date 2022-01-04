@@ -82,7 +82,7 @@ class Iva(Thread):
         StartRoutineEventHandler(self.start_routine_event_queue, self).start()
         UtteranceEventHandler(self.utterance_event_queue, self.intent_classifier, self).start()
         UtteranceIntentEventHandler(self.utterance_intent_event_queue, self.event_scheduler).start()
-        ConfigCommandEventHandler(self.config_command_event_queue).start()
+        ConfigCommandEventHandler(self.config_command_event_queue, self.config).start()
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
         session_uuid = uuid.uuid4()
