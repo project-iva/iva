@@ -6,11 +6,12 @@ from uuid import UUID
 
 from control_session.session import PresenterControlSession
 from event_handlers import *
+from event_handlers.config_command_event_handler import ConfigCommandEventHandler
 from event_scheduler import EventScheduler
 from events.events import StartRoutineEvent, CommandEvent, \
     UtteranceEvent, RaspberryEvent, ChooseMealEvent, \
     ScheduleDayPlanEvent, DayPlanActivityEvent, BackendDataUpdatedEvent, RefreshFrontendComponentEvent, \
-    RefreshDayDataEvent, UtteranceIntentEvent, SpotifyEvent
+    RefreshDayDataEvent, UtteranceIntentEvent, SpotifyEvent, ConfigCommandEvent
 from intent_classifier.classifier import IntentClassifier
 from interactions.input_provider import InputProvider
 from interactions.output_provider import OutputProvider
@@ -49,6 +50,7 @@ class Iva(Thread):
         self.start_routine_event_queue = Queue()
         self.utterance_event_queue = Queue()
         self.utterance_intent_event_queue = Queue()
+        self.config_command_event_queue = Queue()
 
         self.queue_dispatcher = {
             StartRoutineEvent: self.start_routine_event_queue,
@@ -63,6 +65,7 @@ class Iva(Thread):
             RefreshDayDataEvent: self.refresh_day_data_event_queue,
             UtteranceIntentEvent: self.utterance_intent_event_queue,
             SpotifyEvent: self.spotify_event_queue,
+            ConfigCommandEvent: self.config_command_event_queue,
         }
         self.__start_handlers()
 
@@ -79,6 +82,7 @@ class Iva(Thread):
         StartRoutineEventHandler(self.start_routine_event_queue, self).start()
         UtteranceEventHandler(self.utterance_event_queue, self.intent_classifier, self).start()
         UtteranceIntentEventHandler(self.utterance_intent_event_queue, self.event_scheduler).start()
+        ConfigCommandEventHandler(self.config_command_event_queue, self.config).start()
 
     def register_control_session(self, control_session: PresenterControlSession) -> uuid:
         session_uuid = uuid.uuid4()

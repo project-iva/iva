@@ -1,8 +1,9 @@
 from threading import Thread
+
 from slack import RTMClient, WebClient
 
-from events.events import CommandEvent, UtteranceEvent
 from event_scheduler import EventScheduler
+from events.events import CommandEvent, UtteranceEvent
 from interactions.input_provider import InputProvider
 from interactions.output_provider import OutputProvider
 from slack_client.session import SlackSession
@@ -61,7 +62,9 @@ class SlackClientHandler(Thread, InputProvider, OutputProvider):
             command_text = text[1:]
             command_and_args = command_text.split()
             args = command_and_args[1:]
-            self.event_scheduler.schedule_event(CommandEvent(command=command_and_args[0], args=args))
+            self.event_scheduler.schedule_event(
+                CommandEvent(command=command_and_args[0], args=args, output_provider=self)
+            )
         else:
             # if there is an active session expecting an utterance, forward it
             if self.active_session:
